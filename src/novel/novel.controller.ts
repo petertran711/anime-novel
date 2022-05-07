@@ -1,8 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { NovelService } from './novel.service';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { CreateNovelDto } from './dto/create-novel.dto';
 import { UpdateNovelDto } from './dto/update-novel.dto';
+import { NovelService } from './novel.service';
 
+@ApiTags('Novel')
 @Controller('novel')
 export class NovelController {
   constructor(private readonly novelService: NovelService) {}
