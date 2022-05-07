@@ -1,35 +1,23 @@
 import {
   Body,
-  Controller,
-  HttpCode,
-  Post,
-  Req,
-  Session,
-  UseGuards,
-  HttpStatus,
-  Get,
-  Logger,
-  Param,
-  ForbiddenException,
-  Res,
+  Controller, ForbiddenException, Get, HttpCode, HttpStatus, Logger, Post,
+  Req, Res, Session,
+  UseGuards
 } from '@nestjs/common';
-import { Serialize } from 'src/interceptors/serialize.interceptor';
-import { CreateUserDto } from 'src/users/dtos/create-user.dto';
-import { UserDto } from 'src/users/dtos/user.dto';
-import { AuthService } from './auth.service';
-import { LocalAuthGuard } from './guards/local-auth.guard';
 import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
-import RequestWithUser from './requestWithUser.interface';
-import { Response, Request } from 'express';
-import JwtAuthenticationGuard from './guards/jwt-authentication.guard';
-import { LoginUserDto } from './dtos/login-user.dto';
-import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
-import { ForgotPasswordDto } from './dtos/forgotPassword.dto';
-import { ResetPasswordDto } from 'src/users/dtos/reset-password.dto';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
+import { Request, Response } from 'express';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
+import { CreateUserDto } from 'src/users/dtos/create-user.dto';
+import { ResetPasswordDto } from 'src/users/dtos/reset-password.dto';
 import { User } from 'src/users/user.entity';
-import { use } from 'passport';
 import { getRepository } from 'typeorm';
+import { AuthService } from './auth.service';
+import { ForgotPasswordDto } from './dtos/forgotPassword.dto';
+import { LoginUserDto } from './dtos/login-user.dto';
+import JwtAuthenticationGuard from './guards/jwt-authentication.guard';
+import { LocalAuthGuard } from './guards/local-auth.guard';
+import RequestWithUser from './requestWithUser.interface';
 
 @ApiTags('authentication')
 // @ApiBearerAuth('access-token')
@@ -63,7 +51,7 @@ export class AuthController {
     if (currentUser.isDelete) {
       throw new ForbiddenException('Tài khoản của bạn đã bị xoá');
     }
-    const token = await this.authService.getCookieWithJwtToken(currentUser, request.body.deviceType);
+    const token = await this.authService.getCookieWithJwtToken(currentUser);
     response.setHeader('authorization', 'Bearer ' + token.access_token);
     return response.send(token);
   }
@@ -81,7 +69,7 @@ export class AuthController {
   async signinWithFacebook(@Body() body: LoginUserDto, @Req() request, @Res() response: Response) {
     const user = await this.authService.signinWithSocialAccount('facebook', body.access_token);
     console.log('login facek', user);
-    const token = await this.authService.getCookieWithJwtToken(user, body.deviceType);
+    const token = await this.authService.getCookieWithJwtToken(user);
     response.setHeader('authorization', 'Bearer ' + token.access_token);
     return response.send(token);
   }

@@ -1,5 +1,4 @@
 import { IsEmail, IsOptional, IsString } from 'class-validator';
-import { DeviceType } from 'src/helpers/enum';
 
 export class LoginUserDto {
   @IsEmail()
@@ -13,7 +12,4 @@ export class LoginUserDto {
   @IsString()
   @IsOptional()
   access_token: string
-
-  @IsString()
-  deviceType: DeviceType
 }

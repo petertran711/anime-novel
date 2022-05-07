@@ -57,10 +57,9 @@ export class AuthService {
     }
   }
 
-  public async getCookieWithJwtToken(user: User, deviceType: string) {
+  public async getCookieWithJwtToken(user: User) {
     const payload: TokenPayload = {
-      userId: user.id,
-      deviceType: deviceType,
+      userId: user.id
     };
     const secretKey = nanoid(10);
     await getRepository(User).update(user.id, { secrectKey: secretKey });
@@ -155,7 +154,7 @@ export class AuthService {
     if (!currentUser) {
       throw new NotFoundException('Email does not exist');
     }
-    const payload: TokenPayload = { userId: currentUser.id, deviceType: '' };
+    const payload: TokenPayload = { userId: currentUser.id };
     const token = this.jwtService.sign(payload, {
       expiresIn: 300,
       secret: currentUser.secrectKey,
