@@ -45,10 +45,6 @@ export class CreateUserDto {
   lastName?: string;
 
   @IsString()
-  @Length(3, 100)
-  fullName?: string;
-
-  @IsString()
   @IsOptional()
   avatar: string;
 
@@ -57,22 +53,7 @@ export class CreateUserDto {
   @IsOptional()
   phoneNumber?: string;
 
-  @IsBoolean()
-  @IsOptional()
-  isReferred?: boolean;
-
-  @IsString()
-  @IsOptional()
-  referralCode?: string;
-
-  @IsString()
-  @IsOptional()
-  referralId?: string;
-
-  @IsString()
-  @IsOptional()
-  description?: string;
-
+  
   @IsString()
   @IsOptional()
   gender?: string;
@@ -80,10 +61,6 @@ export class CreateUserDto {
   @IsString()
   @IsOptional()
   city?: string;
-
-  @IsBoolean()
-  @IsOptional()
-  isCreateContent?: boolean;
 
   @IsDate()
   @IsOptional()
@@ -93,22 +70,4 @@ export class CreateUserDto {
   @IsOptional()
   roles: RoleInterface;
 
-  @Transform(({ value }) => parseInt(value))
-  @IsNumber()
-  @IsOptional()
-  jobTitleId?: number;
-
-  @Transform(({ value }) => parseInt(value))
-  @IsNumber()
-  @IsOptional()
-  jobCareerId?: number;
-
-  @ApiHideProperty()
-  parent?: User;
-
-  @ApiHideProperty()
-  chain?: number[];
-  //   @IsString()
-  //   @IsOptional()
-  //   referralId?: string;
 }

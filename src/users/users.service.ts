@@ -33,7 +33,6 @@ export class UsersService {
     username,
     firstName,
     lastName,
-    fullName,
     phoneNumber,
     facebookId,
     isActive,
@@ -59,9 +58,7 @@ export class UsersService {
     if (lastName) {
       user.andWhere('user.lastName = :lastName', { lastName });
     }
-    if (fullName) {
-      user.andWhere('user.fullName = :fullName', { fullName });
-    }
+   
 
     if (phoneNumber) {
       user.andWhere('user.phoneNumber = :phoneNumber', { phoneNumber });

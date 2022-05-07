@@ -27,11 +27,7 @@ export class FindUserDto{
   @IsString()
   @IsOptional()
   lastName?: string;
-
-  @IsString()
-  @IsOptional()
-  fullName?: string;
-
+  
   @IsString()
   @IsOptional()
   description?: string;
@@ -53,18 +49,6 @@ export class FindUserDto{
   @IsBooleanString()
   @IsOptional()
   isActive?: string;
-
-  @IsBooleanString()
-  @IsOptional()
-  isCreateContent?: string;
-
-  // @Transform(({ value }) => parseInt(value))
-  // @IsOptional()
-  // roleId: number;
-
-  @IsString()
-  @IsOptional()
-  roles?: string;
 
   @Transform(({ value }) => parseInt(value))
   @IsOptional()
