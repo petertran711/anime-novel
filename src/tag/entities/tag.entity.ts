@@ -6,10 +6,10 @@ export class Tag {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true, select: false })
+  @Column({ nullable: true})
   name: string;
 
-  @Column({ nullable: true, select: false })
+  @Column({ nullable: true})
   description: string;
 
   @ManyToMany(() => Novel, (novel) => novel.categories)

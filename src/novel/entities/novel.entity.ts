@@ -7,13 +7,13 @@ export class Novel {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true, select: false })
+  @Column({ nullable: true})
   name: string;
 
-  @Column({ nullable: true, select: false })
+  @Column({ nullable: true})
   description: string;
 
-  @Column({ nullable: true, select: false })
+  @Column({ nullable: true})
   image: string;
 
   @ManyToMany(() => Tag, (tag) => tag.novels)

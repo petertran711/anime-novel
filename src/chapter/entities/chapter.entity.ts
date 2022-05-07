@@ -5,16 +5,16 @@ export class Chapter {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true, select: false })
+  @Column({ nullable: true})
   name: string;
 
-  @Column({ nullable: true, select: false })
+  @Column({ nullable: true })
   description: string;
 
-  @Column({ nullable: true, select: false })
+  @Column({ nullable: true})
   image: string;
 
-  @Column({ nullable: true, select: false })
+  @Column({ nullable: true })
   content: string;
 
   @ManyToOne(() => Novel, (n) => n.chapters)
