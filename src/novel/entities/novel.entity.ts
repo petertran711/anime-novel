@@ -16,6 +16,18 @@ export class Novel {
   @Column({ nullable: true})
   image: string;
 
+  @Column({ nullable: true})
+  views: number;
+
+  @Column({ nullable: true})
+  author: string;
+
+  @Column({ nullable: true})
+  bookmarked: number;
+
+  @Column({ nullable: true})
+  status: string;
+
   @ManyToMany(() => Tag, (tag) => tag.novels)
   categories: Category[];
   

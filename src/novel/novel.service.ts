@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { Tag } from 'src/tag/entities/tag.entity';
 import { getRepository } from 'typeorm';
 import { CreateNovelDto } from './dto/create-novel.dto';
 import { UpdateNovelDto } from './dto/update-novel.dto';
+import { Novel } from './entities/novel.entity';
 
 @Injectable()
 export class NovelService {
@@ -11,7 +11,7 @@ export class NovelService {
   }
 
   findAll() {
-    return getRepository(Tag).find();
+    return getRepository(Novel).find();
   }
 
   findOne(id: number) {
