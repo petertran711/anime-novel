@@ -38,17 +38,11 @@ export class User {
   @Column({ nullable: true })
   avatar: string;
 
-  @Column({ nullable: true })
-  fullName: string;
-
   @Column({ nullable: true, unique: true })
   phoneNumber: string;
 
   @Column({ default: false })
   isActive: boolean;
-
-  @Column({ default: false })
-  isBuyCourse: boolean;
 
   @Column({ nullable: true })
   activationCode: string;

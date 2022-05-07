@@ -60,7 +60,7 @@ export class MailerService {
   async sendReferUserNotify(user: User) {
     const mail = MailMessage.init()
       .subject('Người dùng đăng ký chuỗi')
-      .greeting(`Hello, ${user.fullName}`)
+      .greeting(`Hello, ${user.lastName}`)
       .line(`Có người dùng mới tham gia vào chuỗi của bạn`);
     return await Mailman.init().to(user.email).send(mail);
   }
