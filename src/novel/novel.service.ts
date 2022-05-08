@@ -11,11 +11,15 @@ export class NovelService {
   }
 
   findAll() {
-    return getRepository(Novel).find();
+    return getRepository(Novel).find(
+      {
+        relations : ['chapters', 'categories']
+      }
+    );
   }
 
   findOne(id: number) {
-    return `This action returns a #${id} novel`;
+    return getRepository(Novel).findOne(id);
   }
 
   update(id: number, updateNovelDto: UpdateNovelDto) {
