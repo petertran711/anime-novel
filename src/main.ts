@@ -41,6 +41,6 @@ async function bootstrap() {
     fs.mkdirSync(codegenDir);
   }
   fs.writeFileSync(__dirname + '/../codegen/api.json', JSON.stringify(document, null, 2));
-  await app.listen(3000);
+  await app.listen(3001);
 }
 bootstrap();
