@@ -23,6 +23,9 @@ export class Novel {
   author: string;
 
   @Column({ nullable: true})
+  rank: string;
+
+  @Column({ nullable: true})
   bookmarked: number;
 
   @Column({ nullable: true})

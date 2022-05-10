@@ -4,13 +4,13 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
-import * as jwt from 'jsonwebtoken';
 import { nanoid } from 'nanoid';
 import { MailerService } from 'src/mailer/mailer.service';
 import { CreateUserDto } from 'src/users/dtos/create-user.dto';
 import { User } from 'src/users/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { getRepository } from 'typeorm';
+import { SocialLogin } from './dtos/social-login.dto';
 import { TokenPayload } from './tokenPayload.interface';
 @Injectable()
 export class AuthService {
@@ -59,7 +59,7 @@ export class AuthService {
 
   public async getCookieWithJwtToken(user: User) {
     const payload: TokenPayload = {
-      userId: user.id
+      userId: user.id,
     };
     const secretKey = nanoid(10);
     await getRepository(User).update(user.id, { secrectKey: secretKey });
@@ -79,51 +79,31 @@ export class AuthService {
     return `Authentication=; HttpOnly; Path=/; Max-Age=0`;
   }
 
-  async signinWithSocialAccount(provider: string, accessToken: string) {
-    if (provider === 'facebook') {
-      // Check the access_token
-
-      const fbuser = await new Promise((resolve, reject) => {
-        this.httpService
-          .get('https://graph.facebook.com/v12.0/me', {
-            params: {
-              fields: 'id, name, email, first_name,last_name',
-              access_token: accessToken,
-            },
-          })
-          .subscribe({
-            next: (v) => {
-              resolve(v.data);
-            },
-            error: (e) => reject(e),
-          });
-      });
-
-      // if (err) {
-      //   throw new BadRequestException('Bad credentials');
-      // }
-      return this.checkExistedUser('facebook', fbuser);
-    }
-  }
-
-  async checkExistedUser(provider: string, user) {
-    console.log('check user fb', user);
+  async signinWithSocialAccount(data: SocialLogin) {
     let createUser;
-    const socialId = user.id;
+    const socialId = data.id;
+
     const existedUsers = await getRepository(User).findOne({
       where: [
         {
-          email: user.email,
+          email: data.email,
         },
         {
           facebookId: socialId,
         },
+        {
+          googleId: socialId,
+        },
       ],
     });
     if (existedUsers) {
-      if (existedUsers.email && !existedUsers.facebookId) {
-        console.log('vao 1');
-        const updatedUser = Object.assign({}, existedUsers, { facebookId: socialId });
+      if ((existedUsers.email && !existedUsers.facebookId) || (existedUsers.email && !existedUsers.googleId)) {
+        let updatedUser;
+        if (data.provider == 'facebook') {
+          updatedUser = Object.assign({}, existedUsers, { facebookId: socialId });
+        } else {
+          updatedUser = Object.assign({}, existedUsers, { googleId: socialId });
+        }
         createUser = getRepository(User).save(updatedUser);
         return createUser;
       } else {
@@ -131,15 +111,21 @@ export class AuthService {
       }
     } else {
       const hashedPassword = await bcrypt.hash(randomBytes(10).toString('hex').toLocaleUpperCase(), 10);
-      const facebookUser = {
-        facebookId: user.id,
-        firstName: user.first_name,
-        lastName: user.last_name,
-        email: user.email || user.id + '@facebook.com',
+
+      let socialUser: any = {
+        firstName: data.first_name,
+        lastName: data.last_name,
         password: hashedPassword,
         isActive: true,
       };
-      createUser = getRepository(User).create(facebookUser);
+      if (data.provider == 'facebook') {
+        socialUser.facebookId = data.id;
+        socialUser.email = data.email || data.id + '@facebook.com';
+      } else {
+        socialUser.googleId = data.id;
+        socialUser.email = data.email || data.id + '@google.com';
+      }
+      createUser = getRepository(User).create(socialUser);
       return getRepository(User).save(createUser);
     }
   }
@@ -169,27 +155,5 @@ export class AuthService {
   async resetPassword(user: User, newPassword: string) {
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     return getRepository(User).update(user.id, { password: hashedPassword });
-  }
-
-  async verifyToken(data: any) {
-    const decode: any = jwt.decode(data.token);
-    if (decode.userId && decode.deviceType && decode.roles) {
-      const existUser = await getRepository(User).findOne({
-        where: {
-          id: decode.userId,
-        },
-      });
-      if (!existUser) throw new NotFoundException('User does not exist');
-      const key = existUser.secrectKey
-      try {
-        jwt.verify(data.token, key);
-        return decode;
-      } catch (error) {
-        console.log('verify token error', error);
-        throw new UnauthorizedException('Token invalid');
-      }
-    } else {
-      throw new UnauthorizedException('Token invalid');
-    }
   }
 }

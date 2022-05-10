@@ -1,10 +1,9 @@
 import {
   Body,
-  Controller, ForbiddenException, Get, HttpCode, HttpStatus, Logger, Post,
+  Controller, ForbiddenException, HttpCode, Logger, Post,
   Req, Res, Session,
   UseGuards
 } from '@nestjs/common';
-import { AuthGuard as PassportAuthGuard } from '@nestjs/passport';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { CurrentUser } from 'src/decorators/current-user.decorator';
@@ -15,6 +14,7 @@ import { getRepository } from 'typeorm';
 import { AuthService } from './auth.service';
 import { ForgotPasswordDto } from './dtos/forgotPassword.dto';
 import { LoginUserDto } from './dtos/login-user.dto';
+import { SocialLogin } from './dtos/social-login.dto';
 import JwtAuthenticationGuard from './guards/jwt-authentication.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import RequestWithUser from './requestWithUser.interface';
@@ -65,27 +65,13 @@ export class AuthController {
     return response.sendStatus(200);
   }
 
-  @Post('/facebook/login')
-  async signinWithFacebook(@Body() body: LoginUserDto, @Req() request, @Res() response: Response) {
-    const user = await this.authService.signinWithSocialAccount('facebook', body.access_token);
+  @Post('/social/login')
+  async signinWithFacebook(@Body() body: SocialLogin, @Res() response: Response) {
+    const user = await this.authService.signinWithSocialAccount(body);
     console.log('login facek', user);
     const token = await this.authService.getCookieWithJwtToken(user);
     response.setHeader('authorization', 'Bearer ' + token.access_token);
     return response.send(token);
-  }
-
-  @Get('/facebook')
-  @UseGuards(PassportAuthGuard('facebook'))
-  async facebookLogin(): Promise<any> {
-    return HttpStatus.OK;
-  }
-
-  @Get('/facebook/redirect')
-  @UseGuards(PassportAuthGuard('facebook'))
-  async facebookLoginRedirect(@Req() request, @Res() response: Response): Promise<any> {
-    const user = await this.authService.signinWithSocialAccount('facebook', request.user.accessToken);
-    request.user = user;
-    return this.logIn(request, response);
   }
 
   @HttpCode(200)
@@ -101,10 +87,4 @@ export class AuthController {
     console.log('user', user);
     return this.authService.resetPassword(user, resetPasswordDto.password);
   }
-
-  @Post('/verifyToken')
-  async verifyToken( @Body() token: string) {
-    return this.authService.verifyToken(token);
-  }
-
 }
