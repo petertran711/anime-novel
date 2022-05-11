@@ -18,6 +18,9 @@ export class Tag {
 
   @CreateDateColumn({ type: 'timestamp', nullable: true })
   createdAt: Date;
+  
+  @Column({ nullable: true, unique: true })
+  uniqueName: string;
 
   @UpdateDateColumn({ type: 'timestamp', nullable: true })
   updatedAt: Date;

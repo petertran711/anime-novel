@@ -1,4 +1,16 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateNovelDto } from './create-novel.dto';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsOptional } from 'class-validator';
 
-export class UpdateNovelDto extends PartialType(CreateNovelDto) {}
+export class UpdateNovelDto {
+    @ApiProperty()
+    @IsOptional()
+    views?: number;
+  
+    @ApiProperty()
+    @IsOptional()
+    author?: string;
+  
+    @ApiProperty()
+    @IsOptional()
+    rank?: string;
+}

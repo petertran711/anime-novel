@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { getRepository } from 'typeorm';
 import { CreateNovelDto } from './dto/create-novel.dto';
 import { UpdateNovelDto } from './dto/update-novel.dto';
@@ -11,19 +11,22 @@ export class NovelService {
   }
 
   findAll() {
-    return getRepository(Novel).find(
-      {
-        relations : ['chapters', 'categories']
-      }
-    );
+    return getRepository(Novel).find({
+      relations: ['chapters', 'categories'],
+    });
   }
 
   findOne(id: number) {
     return getRepository(Novel).findOne(id);
   }
 
-  update(id: number, updateNovelDto: UpdateNovelDto) {
-    return `This action updates a #${id} novel`;
+  async update(id: number, updateNovelDto: UpdateNovelDto) {
+    const existNovel = await getRepository(Novel).findOne(id);
+    if (!existNovel) {
+      throw new NotFoundException();
+    }
+    const update = Object.assign({}, existNovel, updateNovelDto);
+    return getRepository(Novel).save(update);
   }
 
   remove(id: number) {

@@ -11,6 +11,9 @@ export class Chapter {
   @Column({ nullable: true })
   description: string;
 
+  @Column({ nullable: true, unique: true })
+  uniqueName: string;
+  
   @Column({ nullable: true})
   image: string;
 
