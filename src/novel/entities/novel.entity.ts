@@ -1,5 +1,7 @@
 import { Category } from 'src/category/entities/category.entity';
 import { Chapter } from 'src/chapter/entities/chapter.entity';
+import { Comment } from 'src/comment/entities/comment.entity';
+import { Rate } from 'src/rate/entities/rate.entity';
 import { Tag } from 'src/tag/entities/tag.entity';
 import {
   Column,
@@ -8,7 +10,7 @@ import {
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from 'typeorm';
 @Entity()
 export class Novel {
@@ -47,6 +49,12 @@ export class Novel {
 
   @OneToMany(() => Chapter, (c) => c.novel)
   chapters: Chapter[];
+
+  @OneToMany(() => Comment, (c) => c.novel)
+  comments: Comment[];
+
+  @OneToMany(() => Rate, (c) => c.novel)
+  rates: Rate[];
 
   @CreateDateColumn({ type: 'timestamp', nullable: true })
   createdAt: Date;

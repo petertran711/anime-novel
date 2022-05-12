@@ -1,7 +1,8 @@
+import { Rate } from 'src/rate/entities/rate.entity';
 import {
   Column,
   CreateDateColumn,
-  Entity, PrimaryGeneratedColumn,
+  Entity, OneToMany, PrimaryGeneratedColumn,
   UpdateDateColumn
 } from 'typeorm';
 
@@ -75,9 +76,9 @@ export class User {
   })
   googleId: string;
 
-  // @Column('simple-array', { nullable: true })
-  // favoriteCourse: number[];
-
+  @OneToMany(() => Rate, (c) => c.user)
+  rates: Rate[];
+  
   @CreateDateColumn({ type: 'timestamp', nullable: true })
   createdAt: Date;
 
