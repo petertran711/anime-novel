@@ -11,6 +11,7 @@ async function bootstrap() {
     'http://localhost:4000',
     'http://localhost:3000',
     'http://159.223.53.82:3000',
+    'https://light-novel-pub-murex.vercel.app'
   ];
   const app = await NestFactory.create(AppModule);
   app.enableCors({
