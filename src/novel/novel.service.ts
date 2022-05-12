@@ -1,6 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { getRepository } from 'typeorm';
 import { CreateNovelDto } from './dto/create-novel.dto';
+import { FindNovelDto } from './dto/find-novel.dto';
 import { UpdateNovelDto } from './dto/update-novel.dto';
 import { Novel } from './entities/novel.entity';
 
@@ -10,10 +11,21 @@ export class NovelService {
     return 'This action adds a new novel';
   }
 
-  findAll() {
-    return getRepository(Novel).find({
-      relations: ['chapters', 'categories'],
-    });
+  findAll(body : FindNovelDto) {
+    const novels = getRepository(Novel).createQueryBuilder('novel')
+    .leftJoinAndSelect('novel.chapters', 'chapters')
+    .leftJoinAndSelect('novel.categories','categories')
+
+    if(body.uniqueName) {
+      novels.andWhere('novel.uniqueName =:uniqueName', {uniqueName : body.uniqueName}) 
+    }
+    if(body.author) {
+      novels.andWhere('novel.author =:author', {author : body.author}) 
+    }
+    if(body.status) {
+      novels.andWhere('novel.status =:status', {status : body.status}) 
+    }
+    return novels.getMany()
   }
 
   findOne(id: number) {

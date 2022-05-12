@@ -72,7 +72,7 @@ export class FilesController {
   // }
 
   @Get('/download/:container')
-  getFile(@Param('container') container: string, @Res() response: Response, @Query('file') file: string) {
+  getFile(@Param('container') container: string, @Res() response: Response, @Query('file') file: string) {    
     return response.sendFile(file, { root: `./uploads/${container}` });
   }
 

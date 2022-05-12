@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
+import { getRepository } from 'typeorm';
 import { CreateChapterDto } from './dto/create-chapter.dto';
+import { FindChapterDto } from './dto/find-chapter.dto';
 import { UpdateChapterDto } from './dto/update-chapter.dto';
+import { Chapter } from './entities/chapter.entity';
 
 @Injectable()
 export class ChapterService {
@@ -8,8 +11,14 @@ export class ChapterService {
     return 'This action adds a new chapter';
   }
 
-  findAll() {
-    return `This action returns all chapter`;
+  findAll(body : FindChapterDto) {
+    const chapter = getRepository(Chapter).createQueryBuilder('novel')
+
+    if(body.uniqueName) {
+      chapter.andWhere('novel.uniqueName =:uniqueName', {uniqueName : body.uniqueName}) 
+    }
+    
+    return chapter.getMany()
   }
 
   findOne(id: number) {
