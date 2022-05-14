@@ -45,7 +45,6 @@ export class NovelService {
       },
     });
     const newTrends = await getRepository(Novel).find({
-      relations: [''],
       skip: 0,
       take: 10,
     });
