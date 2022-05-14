@@ -13,6 +13,9 @@ export class NovelService {
       .leftJoinAndSelect('novel.categories', 'categories')
       .orderBy('novel.updatedAt', 'DESC');
 
+    if (body.name) {
+      novels.andWhere('novel.name =:name', { name: body.name });
+    }
     if (body.uniqueName) {
       novels.andWhere('novel.uniqueName =:uniqueName', { uniqueName: body.uniqueName });
     }
@@ -29,7 +32,7 @@ export class NovelService {
     if (body.limit !== undefined && body.limit !== null && body.skip) {
       novels.skip(body.skip);
     }
-    return novels.getMany();
+    return novels.getManyAndCount();
   }
 
   findOne(id: number) {

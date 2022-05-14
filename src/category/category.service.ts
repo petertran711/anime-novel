@@ -1,28 +1,32 @@
 import { Injectable } from '@nestjs/common';
 import { getRepository } from 'typeorm';
-import { CreateCategoryDto } from './dto/create-category.dto';
-import { UpdateCategoryDto } from './dto/update-category.dto';
+import { FindCategoryDto } from './dto/find-category.dto';
 import { Category } from './entities/category.entity';
 
 @Injectable()
 export class CategoryService {
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
-  }
+  
 
-  findAll() {
-    return getRepository(Category).find();
+  findAll(body : FindCategoryDto) {
+    const novels = getRepository(Category)
+      .createQueryBuilder('category')
+
+    if (body.name) {
+      novels.andWhere('category.name =:name', { name: body.name });
+    }
+    if (body.limit !== undefined && body.limit !== null) {
+      novels.take(body.limit);
+    }
+
+    if (body.limit !== undefined && body.limit !== null && body.skip) {
+      novels.skip(body.skip);
+    }
+    return novels.getManyAndCount();
   }
 
   findOne(id: number) {
-    return getRepository(Category).findOne();
+    return getRepository(Category).findOne(id);
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
-  }
 
-  remove(id: number) {
-    return getRepository(Category).delete(id)
-  }
 }

@@ -5,6 +5,10 @@ import { IsOptional } from 'class-validator';
 export class FindNovelDto {
     @ApiProperty()
     @IsOptional()
+    name?: string;
+    
+    @ApiProperty()
+    @IsOptional()
     uniqueName?: string;
   
     @ApiProperty()
