@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { getRepository } from 'typeorm';
+import { getRepository, Like } from 'typeorm';
 import { CreateTagDto } from './dto/create-tag.dto';
+import { FindTagDto } from './dto/find-tag.dto';
 import { Tag } from './entities/tag.entity';
 
 @Injectable()
@@ -17,4 +18,12 @@ export class TagService {
     return getRepository(Tag).findOne();
   }
 
+  findByCharacter(body: FindTagDto) {
+    // where: `"column" ILIKE 'keyword'`;
+    return getRepository(Tag).find({
+      where: {
+        name: Like("%M #%")
+      }
+    });
+  }
 }

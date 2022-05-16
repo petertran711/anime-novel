@@ -10,7 +10,8 @@ export class NovelService {
     const novels = getRepository(Novel)
       .createQueryBuilder('novel')
       .leftJoinAndSelect('novel.chapters', 'chapters')
-      .leftJoinAndSelect('novel.categories', 'categories')
+      .leftJoinAndSelect('novel.categories', 'category')
+      .leftJoinAndSelect('novel.tags', 'tag').select([ 'novel', 'chapters', 'category.id', 'category.name','tag.id', 'tag.name', 'tag.uniqueName'])
       .orderBy('novel.updatedAt', 'DESC');
 
     if (body.name) {
@@ -24,6 +25,16 @@ export class NovelService {
     }
     if (body.status) {
       novels.andWhere('novel.status =:status', { status: body.status });
+    }
+    if (body.categoryId) {
+      novels.andWhere('category.id =:id', { id: body.categoryId });
+    }
+    if (body.tagUniqueName) {
+      novels.andWhere('tag.uniqueName =:uniqueName', { uniqueName: body.tagUniqueName });
+    }
+
+    if (body.tagId) {
+      novels.andWhere('tag.id =:id', { id: body.tagId });
     }
     if (body.limit !== undefined && body.limit !== null) {
       novels.take(body.limit);

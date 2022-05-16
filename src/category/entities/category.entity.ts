@@ -1,4 +1,5 @@
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Novel } from 'src/novel/entities/novel.entity';
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 @Entity()
 export class Category {
@@ -11,6 +12,9 @@ export class Category {
   @Column({ nullable: true})
   description: string;
 
+  @ManyToMany(() => Novel, (novel) => novel.categories)
+  novels: Novel[];
+  
   @CreateDateColumn({ type: 'timestamp', nullable: true })
   createdAt: Date;
 

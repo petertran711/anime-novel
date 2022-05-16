@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateTagDto } from './dto/create-tag.dto';
+import { FindTagDto } from './dto/find-tag.dto';
 import { TagService } from './tag.service';
 
 @ApiTags('Tags')
@@ -16,6 +17,11 @@ export class TagController {
   @Get()
   findAll() {
     return this.tagService.findAll();
+  }
+
+  @Get('/findByCharacter')
+  findByCharacter(@Query() name : FindTagDto) {
+    return this.tagService.findByCharacter(name);
   }
 
   @Get(':id')

@@ -10,6 +10,7 @@ export class CategoryService {
   findAll(body : FindCategoryDto) {
     const novels = getRepository(Category)
       .createQueryBuilder('category')
+      .leftJoinAndSelect('category.novels', 'novels')
 
     if (body.name) {
       novels.andWhere('category.name =:name', { name: body.name });

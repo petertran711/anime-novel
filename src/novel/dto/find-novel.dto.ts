@@ -10,6 +10,10 @@ export class FindNovelDto {
     @ApiProperty()
     @IsOptional()
     uniqueName?: string;
+
+    @ApiProperty()
+    @IsOptional()
+    tagUniqueName?: string;
   
     @ApiProperty()
     @IsOptional()
@@ -18,6 +22,14 @@ export class FindNovelDto {
     @ApiProperty()
     @IsOptional()
     status?: string;
+  
+    @Transform(({ value }) => parseInt(value))
+    @IsOptional()
+    categoryId?: number;
+  
+    @Transform(({ value }) => parseInt(value))
+    @IsOptional()
+    tagId?: number;
 
     @Transform(({ value }) => parseInt(value))
     @IsOptional()

@@ -7,6 +7,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinTable,
   ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -44,8 +45,13 @@ export class Novel {
   @Column({ nullable: true })
   status: string;
 
-  @ManyToMany(() => Tag, (tag) => tag.novels)
+  @ManyToMany(() => Category, (cat) => cat.novels)
+  @JoinTable()
   categories: Category[];
+
+  @ManyToMany(() => Tag, (tag) => tag.novels)
+  @JoinTable()
+  tags: Tag[];
 
   @OneToMany(() => Chapter, (c) => c.novel)
   chapters: Chapter[];
