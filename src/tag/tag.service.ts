@@ -19,11 +19,12 @@ export class TagService {
   }
 
   findByCharacter(body: FindTagDto) {
-    // where: `"column" ILIKE 'keyword'`;
-    return getRepository(Tag).find({
+    return getRepository(Tag).findAndCount({
       where: {
-        name: Like("%M #%")
-      }
+        name: Like(`%${body.name}%`),
+      },
+      take: body.limit,
+      skip: body.skip,
     });
   }
 }
