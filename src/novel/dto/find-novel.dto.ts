@@ -31,6 +31,15 @@ export class FindNovelDto {
     @IsOptional()
     tagId?: number;
 
+    @IsOptional()
+    orderByView?: string;
+
+    @IsOptional()
+    orderByLastCreate?: boolean;
+
+    @IsOptional()
+    orderByLastUpdate?: boolean;
+
     @Transform(({ value }) => parseInt(value))
     @IsOptional()
     limit?: number;

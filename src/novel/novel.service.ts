@@ -11,14 +11,15 @@ export class NovelService {
       .createQueryBuilder('novel')
       .leftJoinAndSelect('novel.chapters', 'chapters')
       .leftJoinAndSelect('novel.categories', 'category')
-      .leftJoinAndSelect('novel.tags', 'tag').select([ 'novel', 'chapters', 'category.id', 'category.name','tag.id', 'tag.name', 'tag.uniqueName'])
+      .leftJoinAndSelect('novel.tags', 'tag')
+      .select(['novel', 'chapters', 'category.id', 'category.name', 'tag.id', 'tag.name', 'tag.uniqueName'])
       .orderBy('novel.updatedAt', 'DESC');
 
     if (body.name) {
-      novels.andWhere('novel.name =:name', { name: body.name });
+      novels.andWhere('novel.name LIKE :name', { name: `%${body.name}%` });
     }
     if (body.uniqueName) {
-      novels.andWhere('novel.uniqueName =:uniqueName', { uniqueName: body.uniqueName });
+      novels.andWhere('novel.uniqueName LIKE :uniqueName', { uniqueName: `%${body.uniqueName}%` });
     }
     if (body.author) {
       novels.andWhere('novel.author =:author', { author: body.author });
@@ -30,12 +31,21 @@ export class NovelService {
       novels.andWhere('category.id =:id', { id: body.categoryId });
     }
     if (body.tagUniqueName) {
-      novels.andWhere('tag.uniqueName =:uniqueName', { uniqueName: body.tagUniqueName });
+      novels.andWhere('tag.uniqueName LIKE :uniqueName', { uniqueName: `%${body.tagUniqueName}%` });
     }
 
     if (body.tagId) {
       novels.andWhere('tag.id =:id', { id: body.tagId });
     }
+
+    if (body.orderByView) {
+      novels.orderBy('novel.views', 'DESC');
+    }
+
+    if (body.orderByLastUpdate) {
+      novels.orderBy('chapters.updatedAt', 'DESC');
+    }
+
     if (body.limit !== undefined && body.limit !== null) {
       novels.take(body.limit);
     }
@@ -43,6 +53,7 @@ export class NovelService {
     if (body.limit !== undefined && body.limit !== null && body.skip) {
       novels.skip(body.skip);
     }
+
     return novels.getManyAndCount();
   }
 
