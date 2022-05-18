@@ -9,9 +9,6 @@ export class FindNovelAdvDto {
     @IsOptional()
     tagIds?: number [];
 
-    @IsOptional()
-    orderByLastUpdate?: boolean;
-
     @Transform(({ value }) => parseInt(value))
     @IsOptional()
     limit?: number;

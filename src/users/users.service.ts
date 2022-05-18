@@ -211,7 +211,7 @@ export class UsersService {
           .leftJoinAndSelect('novel.tags', 'tag')
           .select(['novel', 'chapters', 'category.id', 'category.name', 'tag.id', 'tag.name', 'tag.uniqueName'])
           .orderBy('novel.updatedAt', 'DESC')
-          .andWhere('course.id IN(:...courseIds)', { novelIds })
+          .andWhere('novel.id IN(:...novelIds)', { novelIds })
 
         if (limit !== undefined && limit !== null) {
           coursesQuery.take(limit);

@@ -101,10 +101,10 @@ export class NovelService {
       .select(['novel', 'chapters', 'category.id', 'category.name', 'tag.id', 'tag.name', 'tag.uniqueName'])
       .orderBy('novel.updatedAt', 'DESC');
 
-    if (body.categoryIds) {
+    if (body.categoryIds && body.categoryIds.length > 0) {
       novels.andWhere('category.id IN(:...categoryIds)', { id: body.categoryIds });
     }
-    if (body.tagIds) {
+    if (body.tagIds && body.tagIds.length > 0) {
       novels.andWhere('tag.id IN(:...tagIds)', { id: body.tagIds });
     }
     if (body.limit !== undefined && body.limit !== null) {
@@ -114,6 +114,7 @@ export class NovelService {
     if (body.limit !== undefined && body.limit !== null && body.skip) {
       novels.skip(body.skip);
     }
+console.log(novels.getQueryAndParameters());
 
     return novels.getManyAndCount();
   }
