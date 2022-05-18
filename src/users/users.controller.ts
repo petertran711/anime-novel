@@ -1,8 +1,9 @@
 import {
+  Body,
   Controller, Get,
   HttpCode,
   NotFoundException,
-  Param, Post,
+  Param, Patch, Post,
   Query,
   Res,
   UseGuards
@@ -14,6 +15,7 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Serialize } from '../interceptors/serialize.interceptor';
 import { BookmarkDto } from './dtos/bookmark.dto';
 import { FindUserDto } from './dtos/find-user.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
 import { UserDto } from './dtos/user.dto';
 import { UsersService } from './users.service';
 @ApiTags('users')
@@ -21,6 +23,11 @@ import { UsersService } from './users.service';
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService) {}
+  @Get()
+  @UseGuards(JwtAuthenticationGuard, RolesGuard)
+  find(@Query() body: FindUserDto) {
+    return this.usersService.find(body);
+  }
 
   @Get('/:id')
   async findUser(@Param('id') id: string) {
@@ -29,12 +36,12 @@ export class UsersController {
     return user;
   }
 
-  @Get()
-  @UseGuards(JwtAuthenticationGuard, RolesGuard)
-  find(@Query() body: FindUserDto) {
-    return this.usersService.find(body);
+  @Patch('/:id')
+  // @UseGuards(JwtAuthenticationGuard)
+  async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto) {
+    return this.usersService.update(parseInt(id), body);
   }
-
+  
   @Get('/:id/getBookmark')
   async favoriteCourse(@Param('id') id: number, @Query() query: BookmarkDto) {
     return this.usersService.getBookmark(id, query);

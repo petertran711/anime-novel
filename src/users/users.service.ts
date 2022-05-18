@@ -118,7 +118,7 @@ export class UsersService {
     const user = await this.findOne(id);
     if (!user) throw new NotFoundException('User not found!');
     Object.assign(user, attrs);
-    await this.usersRepository.save(user);
+    return this.usersRepository.save(user);
   }
 
   async remove(id: number) {
