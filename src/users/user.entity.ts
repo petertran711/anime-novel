@@ -1,3 +1,4 @@
+import { InAppNotification } from 'src/in-app-notification/entities/in-app-notification.entity';
 import { Rate } from 'src/rate/entities/rate.entity';
 import {
   Column,
@@ -75,6 +76,12 @@ export class User {
     nullable: true,
   })
   googleId: string;
+
+  @Column('simple-array', { nullable: true })
+  bookmark: number[];
+
+  @OneToMany(() => InAppNotification, (notification) => notification.user)
+  notifications: InAppNotification[];
 
   @OneToMany(() => Rate, (c) => c.user)
   rates: Rate[];

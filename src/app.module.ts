@@ -8,14 +8,15 @@ import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { FilesModule } from './files/files.module';
-import { UsersModule } from './users/users.module';
 import { CategoryModule } from './category/category.module';
-import { TagModule } from './tag/tag.module';
-import { NovelModule } from './novel/novel.module';
 import { ChapterModule } from './chapter/chapter.module';
 import { CommentModule } from './comment/comment.module';
+import { FilesModule } from './files/files.module';
+import { InAppNotificationModule } from './in-app-notification/in-app-notification.module';
+import { NovelModule } from './novel/novel.module';
 import { RateModule } from './rate/rate.module';
+import { TagModule } from './tag/tag.module';
+import { UsersModule } from './users/users.module';
 
 const cookieSession = require('cookie-session');
 
@@ -76,6 +77,7 @@ const cookieSession = require('cookie-session');
     ChapterModule,
     CommentModule,
     RateModule,
+    InAppNotificationModule
   ],
   controllers: [AppController],
   providers: [

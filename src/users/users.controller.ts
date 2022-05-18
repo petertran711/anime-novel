@@ -12,6 +12,7 @@ import { Response } from 'express';
 import JwtAuthenticationGuard from 'src/auth/guards/jwt-authentication.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Serialize } from '../interceptors/serialize.interceptor';
+import { BookmarkDto } from './dtos/bookmark.dto';
 import { FindUserDto } from './dtos/find-user.dto';
 import { UserDto } from './dtos/user.dto';
 import { UsersService } from './users.service';
@@ -34,35 +35,10 @@ export class UsersController {
     return this.usersService.find(body);
   }
 
-  // @Post('/changePassword')
-  // @UseGuards(JwtAuthenticationGuard, RolesGuard)
-  // changePassword(@CurrentUser() user: User, @Body() parram: ResetPasswordDto) {
-  //   return this.usersService.changePassword(user, parram);
-  // }
-
-  // @Serialize(UserDto)
-  // @Delete('/:id')
-  // // @Roles(Role.ADMIN)
-  // @UseGuards(JwtAuthenticationGuard, RolesGuard)
-  // deleteById(@Param('id') id: string, @CurrentUser() user: User) {
-  //   if (user.roles !== Role.ADMIN && user.id !== parseInt(id)) {
-  //     throw new ForbiddenException('Dont have permission to update user!');
-  //   }
-  //   return this.usersService.remove(parseInt(id));
-  // }
-
-  // @Patch('/:id')
-  // @Roles(Role.ADMIN, Role.USER)
-  // @UseGuards(JwtAuthenticationGuard, RolesGuard)
-  // async updateUser(@Param('id') id: string, @Body() body: UpdateUserDto, @CurrentUser() user: User) {
-  //   if (user.roles !== Role.ADMIN && user.id !== parseInt(id)) {
-  //     throw new ForbiddenException('Dont have permission to update user!');
-  //   }
-  //   if (user.roles !== Role.ADMIN) {
-  //     body.roles = undefined;
-  //   }
-  //   return this.usersService.update(parseInt(id), body);
-  // }
+  @Get('/:id/getBookmark')
+  async favoriteCourse(@Param('id') id: number, @Query() query: BookmarkDto) {
+    return this.usersService.getBookmark(id, query);
+  }
 
   @Serialize(UserDto)
   @Post('/:id/sendVerificationEmail')

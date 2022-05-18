@@ -3,8 +3,10 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
+import { Novel } from 'src/novel/entities/novel.entity';
 import { FindConditions, getRepository, Repository } from 'typeorm';
 import { MailerService } from '../mailer/mailer.service';
+import { BookmarkDto } from './dtos/bookmark.dto';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { FindUserDto } from './dtos/find-user.dto';
 import { ResetPasswordDto } from './dtos/reset-password.dto';
@@ -189,6 +191,41 @@ export class UsersService {
       return getRepository(User)
         .save(existUser)
         .catch((e) => console.log('cannot update user', e));
+    }
+  }
+
+
+  async getBookmark(userId: any, { limit, skip }: BookmarkDto) {
+    if (!userId) {
+      throw new NotFoundException('Thiếu userId');
+    }
+    const currentUserData = await this.findOne(userId);
+
+    if (currentUserData) {
+      if (currentUserData.bookmark && currentUserData.bookmark.length > 0) {
+        const novelIds = currentUserData.bookmark;
+        const coursesQuery = getRepository(Novel)
+          .createQueryBuilder('novel')
+          .leftJoinAndSelect('novel.chapters', 'chapters')
+          .leftJoinAndSelect('novel.categories', 'category')
+          .leftJoinAndSelect('novel.tags', 'tag')
+          .select(['novel', 'chapters', 'category.id', 'category.name', 'tag.id', 'tag.name', 'tag.uniqueName'])
+          .orderBy('novel.updatedAt', 'DESC')
+          .andWhere('course.id IN(:...courseIds)', { novelIds })
+
+        if (limit !== undefined && limit !== null) {
+          coursesQuery.take(limit);
+        }
+
+        if (limit !== undefined && limit !== null && skip) {
+          coursesQuery.skip(skip);
+        }
+        const courses = await coursesQuery.getManyAndCount();
+        return courses;
+      }
+      return [[], 0];
+    } else {
+      throw new NotFoundException('User không tồn tại');
     }
   }
 }

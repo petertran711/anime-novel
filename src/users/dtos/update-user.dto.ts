@@ -1,6 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsArray, IsBoolean, IsDate, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
-import { Role as RoleInterface } from 'src/helpers/enum';
+import { IsArray, IsDate, IsOptional, IsPhoneNumber, IsString } from 'class-validator';
 
 export class UpdateUserDto {
   @IsString()
@@ -21,40 +20,16 @@ export class UpdateUserDto {
 
   @IsString()
   @IsOptional()
-  fullName: string;
-
-  @IsString()
-  @IsOptional()
   description: string;
-
-  @IsBoolean()
-  @IsOptional()
-  isBuyCourse: boolean;
-
-  @IsBoolean()
-  @IsOptional()
-  isActive: boolean;
 
   @IsPhoneNumber('VN')
   @IsString()
   @IsOptional()
   phoneNumber: string;
 
-  // @IsBoolean()
-  // @IsOptional()
-  // isReferred: boolean;
-
-  @IsString()
-  @IsOptional()
-  referralId: string;
-
   @IsString()
   @IsOptional()
   gender: string;
-
-  @IsString()
-  @IsOptional()
-  city: string;
 
   @IsString()
   @IsOptional()
@@ -67,19 +42,5 @@ export class UpdateUserDto {
 
   @IsArray()
   @IsOptional()
-  favoriteCourse: number[];
-
-  @IsString()
-  @IsOptional()
-  roles: RoleInterface;
-
-  @IsOptional()
-  jobTitleId?: number;
-
-  @IsOptional()
-  jobCareerId?: number;
-
-  @IsString()
-  @IsOptional()
-  referralCode?: string;
+  bookmark: number[];
 }

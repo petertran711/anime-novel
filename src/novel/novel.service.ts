@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { getRepository } from 'typeorm';
+import { FindNovelAdvDto } from './dto/find-novel-adv.dto';
 import { FindNovelDto } from './dto/find-novel.dto';
 import { UpdateNovelDto } from './dto/update-novel.dto';
 import { Novel } from './entities/novel.entity';
@@ -91,7 +92,31 @@ export class NovelService {
       take: 10,
     });
   }
+  async searchAdvance(body: FindNovelAdvDto) {
+    const novels = getRepository(Novel)
+      .createQueryBuilder('novel')
+      .leftJoinAndSelect('novel.chapters', 'chapters')
+      .leftJoinAndSelect('novel.categories', 'category')
+      .leftJoinAndSelect('novel.tags', 'tag')
+      .select(['novel', 'chapters', 'category.id', 'category.name', 'tag.id', 'tag.name', 'tag.uniqueName'])
+      .orderBy('novel.updatedAt', 'DESC');
 
+    if (body.categoryIds) {
+      novels.andWhere('category.id IN(:...categoryIds)', { id: body.categoryIds });
+    }
+    if (body.tagIds) {
+      novels.andWhere('tag.id IN(:...tagIds)', { id: body.tagIds });
+    }
+    if (body.limit !== undefined && body.limit !== null) {
+      novels.take(body.limit);
+    }
+
+    if (body.limit !== undefined && body.limit !== null && body.skip) {
+      novels.skip(body.skip);
+    }
+
+    return novels.getManyAndCount();
+  }
   async update(id: number, updateNovelDto: UpdateNovelDto) {
     const existNovel = await getRepository(Novel).findOne(id);
     if (!existNovel) {
