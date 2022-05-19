@@ -43,7 +43,7 @@ export class User {
   @Column({ nullable: true, unique: true })
   phoneNumber: string;
 
-  @Column({ default: false })
+  @Column({ default: true })
   isActive: boolean;
 
   @Column({ nullable: true })

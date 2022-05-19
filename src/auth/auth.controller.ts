@@ -30,11 +30,6 @@ export class AuthController {
   @Post('/signup')
   async createUser(@Body() body: CreateUserDto, @Session() session: any) {
     const user = await this.authService.register(body);
-
-    this.authService.sendVerifyEmail(user.id).catch((e) => {
-      Logger.warn('Error sending verification email');
-    });
-
     session.userId = user.id;
     return user;
   }
