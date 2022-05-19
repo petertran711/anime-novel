@@ -17,6 +17,7 @@ import { NovelModule } from './novel/novel.module';
 import { RateModule } from './rate/rate.module';
 import { TagModule } from './tag/tag.module';
 import { UsersModule } from './users/users.module';
+import { TagSearchLogModule } from './tag-search-log/tag-search-log.module';
 
 const cookieSession = require('cookie-session');
 
@@ -77,7 +78,8 @@ const cookieSession = require('cookie-session');
     ChapterModule,
     CommentModule,
     RateModule,
-    InAppNotificationModule
+    InAppNotificationModule,
+    TagSearchLogModule
   ],
   controllers: [AppController],
   providers: [

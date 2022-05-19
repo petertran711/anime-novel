@@ -7,7 +7,7 @@ import { Novel } from './entities/novel.entity';
 
 @Injectable()
 export class NovelService {
-  findAll(body: FindNovelDto) {
+  async findAll(body: FindNovelDto) {
     const novels = getRepository(Novel)
       .createQueryBuilder('novel')
       .leftJoinAndSelect('novel.chapters', 'chapters')
@@ -55,7 +55,8 @@ export class NovelService {
       novels.skip(body.skip);
     }
 
-    return novels.getManyAndCount();
+    const data = await novels.getManyAndCount();
+    // const tags = data
   }
 
   findOne(id: number) {
@@ -114,7 +115,6 @@ export class NovelService {
     if (body.limit !== undefined && body.limit !== null && body.skip) {
       novels.skip(body.skip);
     }
-console.log(novels.getQueryAndParameters());
 
     return novels.getManyAndCount();
   }
