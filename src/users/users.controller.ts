@@ -66,7 +66,4 @@ export class UsersController {
 
   
 }
-function CurrentUser() {
-  throw new Error('Function not implemented.');
-}
 

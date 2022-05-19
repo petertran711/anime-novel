@@ -15,8 +15,8 @@ export class TagController {
   }
 
   @Get()
-  findAll() {
-    return this.tagService.findAll();
+  findAll(@Query() body : FindTagDto) {
+    return this.tagService.findAll(body);
   }
 
   @Get('/findByCharacter')
