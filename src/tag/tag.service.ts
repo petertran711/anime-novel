@@ -40,7 +40,7 @@ export class TagService {
   findByCharacter(body: FindTagDto) {
     return getRepository(Tag).findAndCount({
       where: {
-        name: Like(`%${body.name}%`),
+        name: Like(`${body.name}%`),
       },
       take: body.limit,
       skip: body.skip,
