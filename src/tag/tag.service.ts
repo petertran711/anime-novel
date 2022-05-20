@@ -60,6 +60,7 @@ export class TagService {
     if (data[0].length > 0) {
       await this.createSearchData(data[0]);
     }
+    return data
   }
   async createSearchData(tagsearch: Tag[]) {
     if (tagsearch.length > 0) {
