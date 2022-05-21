@@ -1,3 +1,4 @@
+import { Comment } from 'src/comment/entities/comment.entity';
 import { InAppNotification } from 'src/in-app-notification/entities/in-app-notification.entity';
 import { Rate } from 'src/rate/entities/rate.entity';
 import {
@@ -85,6 +86,9 @@ export class User {
 
   @OneToMany(() => Rate, (c) => c.user)
   rates: Rate[];
+
+  @OneToMany(() => Comment, (c) => c.user)
+  comments:Comment [];
   
   @CreateDateColumn({ type: 'timestamp', nullable: true })
   createdAt: Date;

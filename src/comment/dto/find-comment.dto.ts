@@ -9,5 +9,9 @@ export class FindCommentDto {
     @ApiProperty()
     @IsOptional()
     novelId?: number;
+
+    @ApiProperty()
+    @IsOptional()
+    parentId?: number;
   
 }
