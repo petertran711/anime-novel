@@ -56,7 +56,7 @@ export class NovelService {
     }
 
     const data = await novels.getManyAndCount();
-    // const tags = data
+    return data;
   }
 
   findOne(id: number) {
