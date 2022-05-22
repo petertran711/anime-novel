@@ -1,6 +1,9 @@
-enum OrderBy {
-  DESC = 'DESC',
-  ASC = 'ASC'
+export enum OrderBy {
+  RANK = 'RANK',
+  RATE = 'RATE',
+  VIEW = 'VIEW',
+  REVIEW = 'REVIEW',
+  TITLE = 'TITLE',
 }
 
 export enum Role {

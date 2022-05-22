@@ -103,10 +103,12 @@ export class NovelService {
       .orderBy('novel.updatedAt', 'DESC');
 
     if (body.categoryIds && body.categoryIds.length > 0) {
-      novels.andWhere('category.id IN(:...categoryIds)', { id: body.categoryIds });
+      const array = body.categoryIds
+      novels.andWhere('category.id IN(:...id)', { id: body.categoryIds});
+      
     }
     if (body.tagIds && body.tagIds.length > 0) {
-      novels.andWhere('tag.id IN(:...tagIds)', { id: body.tagIds });
+      novels.andWhere('tag.id IN(:...id)', { id: body.tagIds });
     }
     if (body.limit !== undefined && body.limit !== null) {
       novels.take(body.limit);

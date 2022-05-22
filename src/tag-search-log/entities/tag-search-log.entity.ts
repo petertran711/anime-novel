@@ -5,7 +5,7 @@ export class TagSearchLog {
     @PrimaryGeneratedColumn()
     id: number;
   
-    @Column()
+    @Column({unique : true})
     tagName: string;
 
     @Column()

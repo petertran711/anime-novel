@@ -72,7 +72,7 @@ export class TagService {
         } as any);
       });
       if (listTagSearch.length > 0) {
-        await getRepository(TagSearchLog).save(listTagSearch);
+        await getRepository(TagSearchLog).save(listTagSearch).catch(e=> console.log('duplicate'));
       }
     }
   }
