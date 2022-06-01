@@ -45,6 +45,9 @@ export class Novel {
   @Column({ nullable: true })
   status: string;
 
+  @Column({ nullable: true })
+  sourceLink: string;
+
   @ManyToMany(() => Category, (cat) => cat.novels)
   @JoinTable()
   categories: Category[];
