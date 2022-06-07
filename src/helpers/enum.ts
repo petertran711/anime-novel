@@ -4,6 +4,7 @@ export enum OrderBy {
   VIEW = 'VIEW',
   REVIEW = 'REVIEW',
   TITLE = 'TITLE',
+  BOOKMARK = 'BOOKMARK',
 }
 
 export enum Role {

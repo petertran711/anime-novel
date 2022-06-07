@@ -1,6 +1,7 @@
 import { MiddlewareConsumer, Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as Joi from 'joi';
@@ -15,9 +16,9 @@ import { FilesModule } from './files/files.module';
 import { InAppNotificationModule } from './in-app-notification/in-app-notification.module';
 import { NovelModule } from './novel/novel.module';
 import { RateModule } from './rate/rate.module';
+import { TagSearchLogModule } from './tag-search-log/tag-search-log.module';
 import { TagModule } from './tag/tag.module';
 import { UsersModule } from './users/users.module';
-import { TagSearchLogModule } from './tag-search-log/tag-search-log.module';
 
 const cookieSession = require('cookie-session');
 
@@ -79,7 +80,8 @@ const cookieSession = require('cookie-session');
     CommentModule,
     RateModule,
     InAppNotificationModule,
-    TagSearchLogModule
+    TagSearchLogModule,
+    ScheduleModule.forRoot()
   ],
   controllers: [AppController],
   providers: [

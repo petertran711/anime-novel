@@ -8,6 +8,9 @@ export class Chapter {
   @Column({ nullable: true})
   name: string;
 
+  @Column({ nullable: true})
+  episode: string;
+
   @Column({ nullable: true })
   description: string;
 

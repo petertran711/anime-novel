@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
-import * as fs from 'fs';
 import { AppModule } from './app.module';
+import { NovelCronJob } from './schedule/novel-cron-job';
 
 async function bootstrap() {
   const whitelist = [
@@ -11,13 +11,11 @@ async function bootstrap() {
     'http://localhost:4000',
     'http://localhost:3000',
     'http://159.223.53.82:3000',
-    'https://light-novel-pub-murex.vercel.app'
+    'https://light-novel-pub-murex.vercel.app',
   ];
   const app = await NestFactory.create(AppModule);
   app.enableCors({
     origin: function (origin, callback) {
-      // console.log('origin', origin);
-
       if (!origin || whitelist.indexOf(origin) !== -1) {
         callback(null, true);
       } else {
@@ -26,22 +24,16 @@ async function bootstrap() {
     },
   });
   app.use(cookieParser());
-
+  const cron = new NovelCronJob();
+  cron.handleCron();
   const config = new DocumentBuilder()
-    .setTitle('Comartek-elearning-api')
-    .setDescription('Elearning platform')
+    .setTitle('Novel Api')
+    .setDescription('Anime Novel')
     .setVersion('1.0.0')
     .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'access-token')
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('/explorer', app, document);
-
-  // Export api definition
-  const codegenDir = __dirname + '/../codegen';
-  if (!fs.existsSync(codegenDir)) {
-    fs.mkdirSync(codegenDir);
-  }
-  fs.writeFileSync(__dirname + '/../codegen/api.json', JSON.stringify(document, null, 2));
   await app.listen(3001);
 }
 bootstrap();
