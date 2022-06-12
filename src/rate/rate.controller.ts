@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
-import { RateService } from './rate.service';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { CreateRateDto } from './dto/create-rate.dto';
-import { UpdateRateDto } from './dto/update-rate.dto';
+import { RateService } from './rate.service';
 
+@ApiTags('Rate')
 @Controller('rate')
 export class RateController {
   constructor(private readonly rateService: RateService) {}
@@ -21,14 +22,5 @@ export class RateController {
   findOne(@Param('id') id: string) {
     return this.rateService.findOne(+id);
   }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateRateDto: UpdateRateDto) {
-    return this.rateService.update(+id, updateRateDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.rateService.remove(+id);
-  }
+  
 }
