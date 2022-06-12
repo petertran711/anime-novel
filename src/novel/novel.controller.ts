@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { CreateNovelDto } from './dto/create-novel.dto';
 import { FindNovelAdvDto } from './dto/find-novel-adv.dto';
 import { FindNovelDto } from './dto/find-novel.dto';
 import { UpdateNovelDto } from './dto/update-novel.dto';
@@ -10,6 +11,11 @@ import { NovelService } from './novel.service';
 export class NovelController {
   constructor(private readonly novelService: NovelService) {}
 
+  @Post()
+  create(@Body() createRateDto: CreateNovelDto) {
+    return this.novelService.create(createRateDto);
+  }
+  
   @Get()
   findAll(@Query() body: FindNovelDto) {
     return this.novelService.findAll(body);

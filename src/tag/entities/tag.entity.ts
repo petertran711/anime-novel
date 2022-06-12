@@ -12,7 +12,7 @@ export class Tag {
   @Column({ nullable: true})
   description: string;
 
-  @ManyToMany(() => Novel, (novel) => novel.categories)
+  @ManyToMany(() => Novel, (novel) => novel.tags)
   @JoinTable()
   novels: Novel[];
 

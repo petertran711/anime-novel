@@ -1,1 +1,30 @@
-export class CreateNovelDto {}
+import { IsOptional } from 'class-validator';
+
+export class CreateNovelDto {
+  @IsOptional()
+  name: string;
+
+  @IsOptional()
+  uniqueName: string;
+
+  @IsOptional()
+  description: string;
+
+  @IsOptional()
+  image?: string;
+
+  @IsOptional()
+  author?: string;
+
+  @IsOptional()
+  status?: string;
+
+  @IsOptional()
+  sourceLink: string;
+
+  @IsOptional()
+  categoriesId: number;
+
+  @IsOptional()
+  tags: string[];
+}

@@ -1,5 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { getRepository } from 'typeorm';
+import { Category } from 'src/category/entities/category.entity';
+import { createUniqName } from 'src/helpers/ultils';
+import { Tag } from 'src/tag/entities/tag.entity';
+import { getRepository, In } from 'typeorm';
+import { CreateNovelDto } from './dto/create-novel.dto';
 import { FindNovelAdvDto } from './dto/find-novel-adv.dto';
 import { FindNovelDto } from './dto/find-novel.dto';
 import { UpdateNovelDto } from './dto/update-novel.dto';
@@ -136,5 +140,40 @@ export class NovelService {
     }
     const update = Object.assign({}, existNovel, updateNovelDto);
     return getRepository(Novel).save(update);
+  }
+  async create(data: CreateNovelDto) {
+    let category;
+    let tags;
+    if (data.categoriesId) {
+      category = await getRepository(Category).findOne({ where: { id: data.categoriesId } });
+    }
+    if (data.tags) {
+      tags = await getRepository(Tag).find({
+        where: {
+          name: In(data.tags),
+        },
+      });
+      if (tags.length == 0) {
+        const createTags = [];
+        data.tags.forEach((it) => {
+          createTags.push({
+            name: it,
+            uniqueName: createUniqName(it),
+          });
+        });
+        tags = await getRepository(Tag).save(createTags);
+      }
+    }
+    const novel = Object.assign(
+      {},
+      data,
+      {
+        categories: category,
+      },
+      {
+        tags: tags,
+      },
+    );
+    return getRepository(Novel).save(novel)
   }
 }
