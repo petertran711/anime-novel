@@ -142,10 +142,20 @@ export class NovelService {
     return getRepository(Novel).save(update);
   }
   async create(data: CreateNovelDto) {
-    let category;
+    let categories;
     let tags;
-    if (data.categoriesId) {
-      category = await getRepository(Category).findOne({ where: { id: data.categoriesId } });
+    if (data.categories) {
+      categories = await getRepository(Category).findOne({ where: { name: In(data.categories) } });
+      if (categories.length == 0) {
+        const createCategories = [];
+        data.categories.forEach((it) => {
+          createCategories.push({
+            name: it,
+            uniqueName: createUniqName(it),
+          });
+        });
+        tags = await getRepository(Category).save(createCategories);
+      }
     }
     if (data.tags) {
       tags = await getRepository(Tag).find({
@@ -168,12 +178,12 @@ export class NovelService {
       {},
       data,
       {
-        categories: category,
+        categories: categories,
       },
       {
         tags: tags,
       },
     );
-    return getRepository(Novel).save(novel)
+    return getRepository(Novel).save(novel);
   }
 }

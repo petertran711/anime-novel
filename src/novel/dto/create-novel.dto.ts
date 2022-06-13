@@ -23,7 +23,7 @@ export class CreateNovelDto {
   sourceLink: string;
 
   @IsOptional()
-  categoriesId: number;
+  categories: string[];
 
   @IsOptional()
   tags: string[];
