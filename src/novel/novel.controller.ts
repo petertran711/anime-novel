@@ -15,16 +15,21 @@ export class NovelController {
   create(@Body() createRateDto: CreateNovelDto) {
     return this.novelService.create(createRateDto);
   }
-  
+
   @Get()
   findAll(@Query() body: FindNovelDto) {
     return this.novelService.findAll(body);
   }
 
-  
+
   @Get('/getByRanking')
   getByRanking() {
     return this.novelService.getByRanking();
+  }
+
+  @Get('/createNovel')
+  createNovel() {
+    return this.novelService.createNovelBySource();
   }
 
   @Get('/searchAdvance')

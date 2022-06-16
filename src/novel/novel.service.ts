@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Category } from 'src/category/entities/category.entity';
-import { createUniqName } from 'src/helpers/ultils';
+import {createUniqName, donwloadFileFromURL} from 'src/helpers/ultils';
 import { Tag } from 'src/tag/entities/tag.entity';
 import { getRepository, In } from 'typeorm';
 import { CreateNovelDto } from './dto/create-novel.dto';
@@ -8,6 +8,12 @@ import { FindNovelAdvDto } from './dto/find-novel-adv.dto';
 import { FindNovelDto } from './dto/find-novel.dto';
 import { UpdateNovelDto } from './dto/update-novel.dto';
 import { Novel } from './entities/novel.entity';
+import {extname, join} from 'path';
+import {Status} from "../helpers/enum";
+const cheerio = require('cheerio'); // khai báo module cheerio
+const fs = require('fs');
+const request = require("request-promise"); // khai báo module request-promise
+const puppeteer = require('puppeteer');
 
 @Injectable()
 export class NovelService {
@@ -145,7 +151,7 @@ export class NovelService {
     let categories;
     let tags;
     if (data.categories) {
-      categories = await getRepository(Category).findOne({ where: { name: In(data.categories) } });
+      categories = await getRepository(Category).find({ where: { name: In(data.categories) } });
       if (categories.length == 0) {
         const createCategories = [];
         data.categories.forEach((it) => {
@@ -154,7 +160,7 @@ export class NovelService {
             uniqueName: createUniqName(it),
           });
         });
-        tags = await getRepository(Category).save(createCategories);
+        categories = await getRepository(Category).save(createCategories);
       }
     }
     if (data.tags) {
@@ -177,6 +183,12 @@ export class NovelService {
     const novel = Object.assign(
       {},
       data,
+        {
+          status: Status.Ongoing,
+          views: 0,
+          bookmarked: 0,
+          rank: 0,
+        },
       {
         categories: categories,
       },
@@ -185,5 +197,120 @@ export class NovelService {
       },
     );
     return getRepository(Novel).save(novel);
+  }
+
+  async createNovelBySource() {
+    // const filePath = join(__dirname, "..", "uploads/defaults", "source-8c02e6da-298a-4585-9e5e-8acb9d27736b.csv");
+    let data = require("fs").readFileSync('test.csv', "utf8");
+    data = data.split("\r\n");
+    console.log(data, 'csv data');
+    for (const value of data) {
+      if (value !== '') {
+        request(value, (error, response, html) => {
+          console.log(html, 'html'); // 200, kiểm tra xem kết nối thành công không :D
+          fs.writeFileSync('data2.html',html);
+          if(!error && response.statusCode == 200) {
+            const $ = cheerio.load(html); // load HTML
+            const cate = [];
+            const tags = [];
+            const title = $('.post-title > h1').text();
+            const image = $('.summary_image > a > img').attr('src');
+            const imageName = new Date().getTime();
+            const pathImage = donwloadFileFromURL(image, 'uploads/images', `${imageName.toString()}.jpg`)
+            const des = $('#editdescription > p').text();
+            const author = $('.author-content > a').text();
+            $('.genres-content > a').each((index, el) => {
+              const text = $(el).text();
+              cate.push(text);
+            });
+            $('.tags-content > a').each((index, el) => {
+              const text = $(el).text();
+              tags.push(text);
+            });
+
+            console.log(123);
+            const myNovel: CreateNovelDto = {
+              name: title.trim(),
+              uniqueName: createUniqName(title.trim()),
+              description: des,
+              sourceLink: value,
+              categories: cate,
+              tags: tags,
+              image: `${imageName.toString()}.jpg`
+            }
+            this.create(myNovel);
+          }
+        });
+      }
+      // fs.writeFileSync('data.html', $.html);
+    }
+
+  }
+
+  async crawlNovels() {
+    const allNovel = await this.findAll({})
+    allNovel[0].forEach(novel => {
+      this.openPage(novel.sourceLink, 'wp-manga-chapter')
+          .then(body => {
+            // fs.writeFileSync('data.html', body);
+            const $ = cheerio.load(body);
+            const urls = [];
+            $('.wp-manga-chapter').each((index, el) => {
+              let link = $(el).find('a').attr('href');
+              const att = link.split('/');
+              urls.push(link)
+            });
+            this.getChapter(urls[0]);
+          })
+          .catch((e) => {
+            Error(e);
+          });
+    })
+  }
+
+  async openPage(value, className?) {
+    return  new Promise((resolve, reject) => {
+      puppeteer.launch()
+          .then(browser => {
+            browser.newPage()
+                .then(page => {
+                  page.goto(value)
+                      .then(() => page.waitForSelector(`.${className ? className : ''}`, { timeout: 2000 }))
+                      .then(() => page.evaluate(() => {
+                        return document.querySelector('body').innerHTML;
+                      })
+                          .then(async body => {
+                            await browser.close();
+                            resolve(body)
+                          }))
+                })
+          })
+          .catch(e => {
+            reject(e)
+          })
+    });
+  }
+
+  getChapter(value) {
+    this.openPage(value)
+        .then(chapter => {
+          const new$ = cheerio.load(chapter);
+          const content = new$('.cha-words').html();
+          let datapase = ''
+          new$(content).each((index, el) => {
+            let p = new$(el).find('p').html();
+            let html = '<p>'
+            if (p) {
+              html += `${p.toString()}</p>`
+              datapase += html;
+            }
+            console.log(p);
+          })
+          fs.writeFileSync('data.txt', datapase);
+          console.log(chapter);
+        })
+        .catch(e => {
+          Error(e);
+        })
   }
 }

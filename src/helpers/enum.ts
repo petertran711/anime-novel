@@ -13,3 +13,7 @@ export enum Role {
   ADMIN = 'ADMIN',
   RESETPASSWORD = 'RESETPASSWORD',
 }
+
+export enum Status {
+  Ongoing = 'Ongoing'
+}
