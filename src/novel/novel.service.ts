@@ -1,15 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Category } from 'src/category/entities/category.entity';
-import {createUniqName, donwloadFileFromURL} from 'src/helpers/ultils';
+import { createUniqName, donwloadFileFromURL } from 'src/helpers/ultils';
 import { Tag } from 'src/tag/entities/tag.entity';
 import { getRepository, In } from 'typeorm';
+import { Status } from "../helpers/enum";
 import { CreateNovelDto } from './dto/create-novel.dto';
 import { FindNovelAdvDto } from './dto/find-novel-adv.dto';
 import { FindNovelDto } from './dto/find-novel.dto';
 import { UpdateNovelDto } from './dto/update-novel.dto';
 import { Novel } from './entities/novel.entity';
-import {extname, join} from 'path';
-import {Status} from "../helpers/enum";
 import {CreateChapterDto} from "../chapter/dto/create-chapter.dto";
 import {Chapter} from "../chapter/entities/chapter.entity";
 const cheerio = require('cheerio'); // khai báo module cheerio
@@ -205,6 +204,7 @@ export class NovelService {
   async createNovelBySource() {
     // const filePath = join(__dirname, "..", "uploads/defaults", "source-8c02e6da-298a-4585-9e5e-8acb9d27736b.csv");
     let data = require("fs").readFileSync('test.csv', "utf8");
+    const donwloadImagePath = process.env.IMAGE_PATH
     data = data.split("\r\n");
     console.log(data, 'csv data');
     for (const value of data) {
@@ -219,7 +219,7 @@ export class NovelService {
             const title = $('.post-title > h1').text();
             const image = $('.summary_image > a > img').attr('src');
             const imageName = new Date().getTime();
-            const pathImage = donwloadFileFromURL(image, 'uploads/images', `${imageName.toString()}.jpg`)
+            const pathImage = donwloadFileFromURL(image, donwloadImagePath, `${imageName.toString()}.jpg`)
             const des = $('#editdescription > p').text();
             const author = $('.author-content > a').text();
             $('.genres-content > a').each((index, el) => {
@@ -325,8 +325,9 @@ export class NovelService {
         }
         console.log(p);
       })
+      const filePath = process.env.CHAPTER_FILES + 'data.txt'
       const fileName = 'data.txt'
-      fs.writeFileSync(fileName, datapase);
+      fs.writeFileSync(filePath, datapase);
       const chapterDto: CreateChapterDto = {
         name: value.name,
         uniqueName: value.uniqueName,
