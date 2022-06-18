@@ -32,6 +32,11 @@ export class NovelController {
     return this.novelService.createNovelBySource();
   }
 
+  @Get('/crawlNovel')
+  crawlNovel() {
+    return this.novelService.crawlNovels();
+  }
+
   @Get('/searchAdvance')
   searchAdvance(@Query() body : FindNovelAdvDto) {
     return this.novelService.searchAdvance(body);

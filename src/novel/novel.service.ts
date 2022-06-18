@@ -10,13 +10,16 @@ import { UpdateNovelDto } from './dto/update-novel.dto';
 import { Novel } from './entities/novel.entity';
 import {extname, join} from 'path';
 import {Status} from "../helpers/enum";
+import {CreateChapterDto} from "../chapter/dto/create-chapter.dto";
+import {Chapter} from "../chapter/entities/chapter.entity";
 const cheerio = require('cheerio'); // khai báo module cheerio
 const fs = require('fs');
 const request = require("request-promise"); // khai báo module request-promise
 const puppeteer = require('puppeteer');
-
 @Injectable()
 export class NovelService {
+   constructor() {
+  }
   async findAll(body: FindNovelDto) {
     const novels = getRepository(Novel)
       .createQueryBuilder('novel')
@@ -249,68 +252,91 @@ export class NovelService {
 
   async crawlNovels() {
     const allNovel = await this.findAll({})
-    allNovel[0].forEach(novel => {
-      this.openPage(novel.sourceLink, 'wp-manga-chapter')
-          .then(body => {
-            // fs.writeFileSync('data.html', body);
-            const $ = cheerio.load(body);
-            const urls = [];
-            $('.wp-manga-chapter').each((index, el) => {
-              let link = $(el).find('a').attr('href');
-              const att = link.split('/');
-              urls.push(link)
+    for(let novel of allNovel[0])
+    {
+      if (novel.sourceLink) {
+        this.openPage(novel.sourceLink, 'wp-manga-chapter')
+            .then(async body => {
+              // fs.writeFileSync('data.html', body);
+              const $ = cheerio.load(body);
+              const urls = [];
+              $('.wp-manga-chapter').each((index, el) => {
+                let link = $(el).find('a').attr('href');
+                let nameChapter = $(el).find('a').text();
+                const att = link.split('/');
+                const name = [];
+                att.forEach(value => {
+                  if (value !== '') {
+                    name.push(value);
+                  }
+                })
+                const current = novel.chapters.find(value => value.uniqueName === name[name.length - 1]);
+                if (!current) {
+                  urls.push({url: link, name: nameChapter, uniqueName: name[name.length - 1]});
+                }
+              });
+              //  this.getChapter(urls[0], novel);
+              for (let url of urls) {
+                await this.getChapter(url, novel)
+              }
+            })
+            .catch((e) => {
+              Error(e);
             });
-            this.getChapter(urls[0]);
-          })
-          .catch((e) => {
-            Error(e);
-          });
-    })
+      }
+    }
   }
 
   async openPage(value, className?) {
-    return  new Promise((resolve, reject) => {
-      puppeteer.launch()
-          .then(browser => {
-            browser.newPage()
-                .then(page => {
-                  page.goto(value)
-                      .then(() => page.waitForSelector(`.${className ? className : ''}`, { timeout: 2000 }))
-                      .then(() => page.evaluate(() => {
-                        return document.querySelector('body').innerHTML;
-                      })
-                          .then(async body => {
-                            await browser.close();
-                            resolve(body)
-                          }))
-                })
-          })
-          .catch(e => {
-            reject(e)
+    return  new Promise(async (resolve, reject) => {
+      const browser = await puppeteer.launch()
+      browser.newPage()
+          .then(async page => {
+            try {
+              await page.goto(value);
+              if (className) {
+                await page.waitForSelector(`.${className}`, {timeout: 2000});
+              }
+             // await page.waitForSelector(`${className ? `.${className}` : ''}`, {timeout: 2000});
+              const body = await page.evaluate(() => {
+                return document.querySelector('body').innerHTML;
+              })
+              await page.close();
+              resolve(body)
+            } catch (e) {
+              reject(e)
+            }
           })
     });
   }
 
-  getChapter(value) {
-    this.openPage(value)
-        .then(chapter => {
-          const new$ = cheerio.load(chapter);
-          const content = new$('.cha-words').html();
-          let datapase = ''
-          new$(content).each((index, el) => {
-            let p = new$(el).find('p').html();
-            let html = '<p>'
-            if (p) {
-              html += `${p.toString()}</p>`
-              datapase += html;
-            }
-            console.log(p);
-          })
-          fs.writeFileSync('data.txt', datapase);
-          console.log(chapter);
-        })
-        .catch(e => {
-          Error(e);
-        })
+  async getChapter(value, novel) {
+    try {
+      const chapter = await this.openPage(value.url);
+      const new$ = cheerio.load(chapter);
+      const content = new$('.cha-words').html();
+      let datapase = ''
+      new$(content).each((index, el) => {
+        let p = new$(el).find('p').html();
+        let html = '<p>'
+        if (p) {
+          html += `${p.toString()}</p>`
+          datapase += html;
+        }
+        console.log(p);
+      })
+      const fileName = 'data.txt'
+      fs.writeFileSync(fileName, datapase);
+      const chapterDto: CreateChapterDto = {
+        name: value.name,
+        uniqueName: value.uniqueName,
+        description: null,
+        content: fileName
+      }
+      getRepository(Chapter).save(chapterDto);
+      console.log(chapter);
+    } catch (e) {
+      Error(e);
+    }
   }
 }
