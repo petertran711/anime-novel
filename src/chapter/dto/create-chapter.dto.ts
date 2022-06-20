@@ -1,15 +1,26 @@
-import {IsOptional} from "class-validator";
+import { Transform } from 'class-transformer';
+import { IsOptional } from 'class-validator';
 
 export class CreateChapterDto {
-    @IsOptional()
-    name: string;
+  @IsOptional()
+  name: string;
 
-    @IsOptional()
-    uniqueName: string;
+  @IsOptional()
+  episode: number;
 
-    @IsOptional()
-    description: string;
+  @IsOptional()
+  description: string;
 
-    @IsOptional()
-    content: string;
+  @IsOptional()
+  uniqueName: string;
+
+  @IsOptional()
+  image: string;
+
+  @IsOptional()
+  content: string;
+
+  @Transform(({ value }) => parseInt(value))
+  @IsOptional()
+  novelId: number;
 }

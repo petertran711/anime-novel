@@ -1,4 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { createUniqName } from 'src/helpers/ultils';
+import { Novel } from 'src/novel/entities/novel.entity';
 import { getRepository } from 'typeorm';
 import { CreateChapterDto } from './dto/create-chapter.dto';
 import { FindChapterDto } from './dto/find-chapter.dto';
@@ -7,18 +9,36 @@ import { Chapter } from './entities/chapter.entity';
 
 @Injectable()
 export class ChapterService {
-  create(createChapterDto: CreateChapterDto) {
-    return 'This action adds a new chapter';
+  async create(createChapterDto: CreateChapterDto) {
+    if (!createChapterDto.novelId) throw new BadRequestException('Thieu Novel ID');
+    const novel = await getRepository(Novel).findOne({
+      where: {
+        id: createChapterDto.novelId,
+      },
+      relations: ['chapters'],
+    });
+    if (!novel) throw new NotFoundException('Novel khong ton tai');
+    if (!createChapterDto.episode) {
+      createChapterDto.episode = novel.chapters[novel.chapters.length - 1].episode + 1;
+    }
+    if (!createChapterDto.uniqueName) {
+      createChapterDto.uniqueName = createUniqName(createChapterDto.name);
+    }
+    console.log('createChapterDto', createChapterDto);
+    const data = Object.assign({}, createChapterDto, {
+      novel,
+    });
+    return getRepository(Chapter).save(data);
   }
 
-  findAll(body : FindChapterDto) {
-    const chapter = getRepository(Chapter).createQueryBuilder('novel')
+  findAll(body: FindChapterDto) {
+    const chapter = getRepository(Chapter).createQueryBuilder('novel');
 
-    if(body.uniqueName) {
-      chapter.andWhere('novel.uniqueName =:uniqueName', {uniqueName : body.uniqueName}) 
+    if (body.uniqueName) {
+      chapter.andWhere('novel.uniqueName =:uniqueName', { uniqueName: body.uniqueName });
     }
-    
-    return chapter.getMany()
+
+    return chapter.getMany();
   }
 
   findOne(id: number) {
