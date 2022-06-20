@@ -1,15 +1,11 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { Interval } from '@nestjs/schedule';
-import { NovelService } from "../novel/novel.service";
+import { Injectable } from '@nestjs/common';
+import { Cron, SchedulerRegistry } from '@nestjs/schedule';
 
 @Injectable()
-export class NovelCronJob {
-  constructor(private noverservice : NovelService){}
-  private readonly logger = new Logger(NovelCronJob.name);
-  @Interval(1000 * 60)
-  async handleCron() {
-    this.logger.debug('Called every 10 seconds');
-
-    const a  = this.noverservice.findOne(1)
+export class NovelCronJobService {
+  constructor(private schedulerRegistry: SchedulerRegistry) {}
+  @Cron('*/10 * * * * *')
+  async crawlNovel() {
+    console.log('My cron running after 10 sec...');
   }
 }
