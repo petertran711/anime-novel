@@ -297,7 +297,6 @@ export class NovelService {
               if (className) {
                 await page.waitForSelector(`.${className}`, {timeout: 2000});
               }
-             // await page.waitForSelector(`${className ? `.${className}` : ''}`, {timeout: 2000});
               const body = await page.evaluate(() => {
                 return document.querySelector('body').innerHTML;
               })
@@ -325,8 +324,8 @@ export class NovelService {
         }
         console.log(p);
       })
-      const filePath = process.env.CHAPTER_FILES + 'data.txt'
-      const fileName = 'data.txt'
+      const fileName = new Date().getTime().toString();
+      const filePath = process.env.CHAPTER_FILES + fileName
       fs.writeFileSync(filePath, datapase);
       const chapterDto: CreateChapterDto = {
         name: value.name,
