@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
-import { NovelCronJob } from './schedule/novel-cron-job';
+import { NovelCronJobService } from './schedule/novel-cron-job';
 
 async function bootstrap() {
   const whitelist = [
@@ -24,8 +24,9 @@ async function bootstrap() {
     },
   });
   app.use(cookieParser());
-  const cron = new NovelCronJob();
-  cron.handleCron();
+  const novel = app.get(NovelCronJobService);
+  novel.crawlNovel();
+
   const config = new DocumentBuilder()
     .setTitle('Novel Api')
     .setDescription('Anime Novel')

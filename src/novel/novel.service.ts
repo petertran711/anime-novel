@@ -3,14 +3,13 @@ import { Category } from 'src/category/entities/category.entity';
 import { createUniqName, donwloadFileFromURL } from 'src/helpers/ultils';
 import { Tag } from 'src/tag/entities/tag.entity';
 import { getRepository, In } from 'typeorm';
+import { Chapter } from "../chapter/entities/chapter.entity";
 import { Status } from "../helpers/enum";
 import { CreateNovelDto } from './dto/create-novel.dto';
 import { FindNovelAdvDto } from './dto/find-novel-adv.dto';
 import { FindNovelDto } from './dto/find-novel.dto';
 import { UpdateNovelDto } from './dto/update-novel.dto';
 import { Novel } from './entities/novel.entity';
-import {CreateChapterDto} from "../chapter/dto/create-chapter.dto";
-import {Chapter} from "../chapter/entities/chapter.entity";
 const cheerio = require('cheerio'); // khai báo module cheerio
 const fs = require('fs');
 const request = require("request-promise"); // khai báo module request-promise
@@ -327,7 +326,7 @@ export class NovelService {
       const fileName = new Date().getTime().toString();
       const filePath = process.env.CHAPTER_FILES + fileName
       fs.writeFileSync(filePath, datapase);
-      const chapterDto: CreateChapterDto = {
+      const chapterDto = {
         name: value.name,
         uniqueName: value.uniqueName,
         description: null,

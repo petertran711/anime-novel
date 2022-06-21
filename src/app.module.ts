@@ -16,6 +16,7 @@ import { FilesModule } from './files/files.module';
 import { InAppNotificationModule } from './in-app-notification/in-app-notification.module';
 import { NovelModule } from './novel/novel.module';
 import { RateModule } from './rate/rate.module';
+import { NovelCronJobService } from './schedule/novel-cron-job';
 import { TagSearchLogModule } from './tag-search-log/tag-search-log.module';
 import { TagModule } from './tag/tag.module';
 import { UsersModule } from './users/users.module';
@@ -81,7 +82,7 @@ const cookieSession = require('cookie-session');
     RateModule,
     InAppNotificationModule,
     TagSearchLogModule,
-    ScheduleModule.forRoot()
+    ScheduleModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [
@@ -90,6 +91,7 @@ const cookieSession = require('cookie-session');
       provide: APP_PIPE,
       useValue: new ValidationPipe({ whitelist: true }),
     },
+    NovelCronJobService,
   ],
 })
 export class AppModule {
