@@ -178,4 +178,19 @@ export class FilesController {
     }
     return data;
   }
+
+  @Post('/upload/images')
+  @ApiFile('files', true, {
+    storage: diskStorage({
+      destination: './uploads/images',
+      filename: (req, file, cb) => {
+        const filename: string = path.parse(file.originalname).name.replace(/\s/g, '') + '-' + uuidv4();
+        const extension: string = path.parse(file.originalname).ext;
+        cb(null, `${filename}${extension}`);
+      },
+    }),
+  })
+  uploadImages(@UploadedFile() file: Express.Multer.File) {
+    return { containter: file.destination.substring(10), filename: file.filename };
+  }
 }
