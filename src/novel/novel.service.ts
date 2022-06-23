@@ -3,8 +3,8 @@ import { Category } from 'src/category/entities/category.entity';
 import { createUniqName, donwloadFileFromURL } from 'src/helpers/ultils';
 import { Tag } from 'src/tag/entities/tag.entity';
 import { getRepository, In } from 'typeorm';
-import { Chapter } from "../chapter/entities/chapter.entity";
-import { Status } from "../helpers/enum";
+import { Chapter } from '../chapter/entities/chapter.entity';
+import { Status } from '../helpers/enum';
 import { CreateNovelDto } from './dto/create-novel.dto';
 import { FindNovelAdvDto } from './dto/find-novel-adv.dto';
 import { FindNovelDto } from './dto/find-novel.dto';
@@ -12,12 +12,11 @@ import { UpdateNovelDto } from './dto/update-novel.dto';
 import { Novel } from './entities/novel.entity';
 const cheerio = require('cheerio'); // khai báo module cheerio
 const fs = require('fs');
-const request = require("request-promise"); // khai báo module request-promise
+const request = require('request-promise'); // khai báo module request-promise
 const puppeteer = require('puppeteer');
 @Injectable()
 export class NovelService {
-   constructor() {
-  }
+  constructor() {}
   async findAll(body: FindNovelDto) {
     const novels = getRepository(Novel)
       .createQueryBuilder('novel')
@@ -184,12 +183,12 @@ export class NovelService {
     const novel = Object.assign(
       {},
       data,
-        {
-          status: Status.Ongoing,
-          views: 0,
-          bookmarked: 0,
-          rank: 0,
-        },
+      {
+        status: Status.Ongoing,
+        views: 0,
+        bookmarked: 0,
+        rank: 0,
+      },
       {
         categories: categories,
       },
@@ -202,23 +201,23 @@ export class NovelService {
 
   async createNovelBySource() {
     // const filePath = join(__dirname, "..", "uploads/defaults", "source-8c02e6da-298a-4585-9e5e-8acb9d27736b.csv");
-    let data = require("fs").readFileSync('test.csv', "utf8");
-    const donwloadImagePath = process.env.IMAGE_PATH
-    data = data.split("\r\n");
+    let data = require('fs').readFileSync('test.csv', 'utf8');
+    const donwloadImagePath = process.env.IMAGE_PATH;
+    data = data.split('\r\n');
     console.log(data, 'csv data');
     for (const value of data) {
       if (value !== '') {
         request(value, (error, response, html) => {
           console.log(html, 'html'); // 200, kiểm tra xem kết nối thành công không :D
-          fs.writeFileSync('data2.html',html);
-          if(!error && response.statusCode == 200) {
+          fs.writeFileSync('data2.html', html);
+          if (!error && response.statusCode == 200) {
             const $ = cheerio.load(html); // load HTML
             const cate = [];
             const tags = [];
             const title = $('.post-title > h1').text();
             const image = $('.summary_image > a > img').attr('src');
             const imageName = new Date().getTime();
-            const pathImage = donwloadFileFromURL(image, donwloadImagePath, `${imageName.toString()}.jpg`)
+            const pathImage = donwloadFileFromURL(image, donwloadImagePath, `${imageName.toString()}.jpg`);
             const des = $('#editdescription > p').text();
             const author = $('.author-content > a').text();
             $('.genres-content > a').each((index, el) => {
@@ -238,73 +237,73 @@ export class NovelService {
               sourceLink: value,
               categories: cate,
               tags: tags,
-              image: `${imageName.toString()}.jpg`
-            }
+              image: `${imageName.toString()}.jpg`,
+            };
             this.create(myNovel);
           }
         });
       }
       // fs.writeFileSync('data.html', $.html);
     }
-
   }
 
   async crawlNovels() {
-    const allNovel = await this.findAll({})
-    for(let novel of allNovel[0])
-    {
+    const allNovel = await this.findAll({});
+    for (let novel of allNovel[0]) {
       if (novel.sourceLink) {
         this.openPage(novel.sourceLink, 'wp-manga-chapter')
-            .then(async body => {
-              // fs.writeFileSync('data.html', body);
-              const $ = cheerio.load(body);
-              const urls = [];
-              $('.wp-manga-chapter').each((index, el) => {
-                let link = $(el).find('a').attr('href');
-                let nameChapter = $(el).find('a').text();
-                const att = link.split('/');
-                const name = [];
-                att.forEach(value => {
-                  if (value !== '') {
-                    name.push(value);
-                  }
-                })
-                const current = novel.chapters.find(value => value.uniqueName === name[name.length - 1]);
-                if (!current) {
-                  urls.push({url: link, name: nameChapter, uniqueName: name[name.length - 1]});
+          .then(async (body) => {
+            // fs.writeFileSync('data.html', body);
+            const $ = cheerio.load(body);
+            const urls = [];
+            $('.wp-manga-chapter').each((index, el) => {
+              let link = $(el).find('a').attr('href');
+              let nameChapter = $(el).find('a').text();
+              const att = link.split('/');
+              const name = [];
+              att.forEach((value) => {
+                if (value !== '') {
+                  name.push(value);
                 }
               });
-              //  this.getChapter(urls[0], novel);
-              for (let url of urls) {
-                await this.getChapter(url, novel)
+              const current = novel.chapters.find((value) => value.uniqueName === name[name.length - 1]);
+              if (!current) {
+                urls.push({ url: link, name: nameChapter, uniqueName: name[name.length - 1] });
               }
-            })
-            .catch((e) => {
-              Error(e);
             });
+            //  this.getChapter(urls[0], novel);
+            for (let url of urls) {
+              await this.getChapter(url, novel);
+            }
+          })
+          .catch((e) => {
+            Error(e);
+          });
       }
     }
   }
 
   async openPage(value, className?) {
-    return  new Promise(async (resolve, reject) => {
-      const browser = await puppeteer.launch()
-      browser.newPage()
-          .then(async page => {
-            try {
-              await page.goto(value);
-              if (className) {
-                await page.waitForSelector(`.${className}`, {timeout: 2000});
-              }
-              const body = await page.evaluate(() => {
-                return document.querySelector('body').innerHTML;
-              })
-              await page.close();
-              resolve(body)
-            } catch (e) {
-              reject(e)
-            }
-          })
+    return new Promise(async (resolve, reject) => {
+      const browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      });
+      browser.newPage().then(async (page) => {
+        try {
+          await page.goto(value);
+          if (className) {
+            await page.waitForSelector(`.${className}`, { timeout: 2000 });
+          }
+          const body = await page.evaluate(() => {
+            return document.querySelector('body').innerHTML;
+          });
+          await page.close();
+          resolve(body);
+        } catch (e) {
+          reject(e);
+        }
+      });
     });
   }
 
@@ -313,25 +312,25 @@ export class NovelService {
       const chapter = await this.openPage(value.url);
       const new$ = cheerio.load(chapter);
       const content = new$('.cha-words').html();
-      let datapase = ''
+      let datapase = '';
       new$(content).each((index, el) => {
         let p = new$(el).find('p').html();
-        let html = '<p>'
+        let html = '<p>';
         if (p) {
-          html += `${p.toString()}</p>`
+          html += `${p.toString()}</p>`;
           datapase += html;
         }
         console.log(p);
-      })
+      });
       const fileName = new Date().getTime().toString();
-      const filePath = process.env.CHAPTER_FILES + fileName
+      const filePath = process.env.CHAPTER_FILES + fileName;
       fs.writeFileSync(filePath, datapase);
       const chapterDto = {
         name: value.name,
         uniqueName: value.uniqueName,
         description: null,
-        content: fileName
-      }
+        content: fileName,
+      };
       getRepository(Chapter).save(chapterDto);
       console.log(chapter);
     } catch (e) {
