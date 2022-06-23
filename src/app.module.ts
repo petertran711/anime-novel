@@ -1,4 +1,4 @@
-import { MiddlewareConsumer, Module, ValidationPipe } from '@nestjs/common';
+import { Logger, MiddlewareConsumer, Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -93,7 +93,8 @@ const cookieSession = require('cookie-session');
       useValue: new ValidationPipe({ whitelist: true }),
     },
     NovelCronJobService,
-    NovelService
+    NovelService,
+    Logger
   ],
 })
 export class AppModule {
