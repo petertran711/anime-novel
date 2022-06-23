@@ -15,6 +15,7 @@ import { CommentModule } from './comment/comment.module';
 import { FilesModule } from './files/files.module';
 import { InAppNotificationModule } from './in-app-notification/in-app-notification.module';
 import { NovelModule } from './novel/novel.module';
+import { NovelService } from './novel/novel.service';
 import { RateModule } from './rate/rate.module';
 import { NovelCronJobService } from './schedule/novel-cron-job';
 import { TagSearchLogModule } from './tag-search-log/tag-search-log.module';
@@ -92,6 +93,7 @@ const cookieSession = require('cookie-session');
       useValue: new ValidationPipe({ whitelist: true }),
     },
     NovelCronJobService,
+    NovelService
   ],
 })
 export class AppModule {
