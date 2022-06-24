@@ -16,7 +16,10 @@ const request = require('request-promise'); // khai báo module request-promise
 const puppeteer = require('puppeteer');
 @Injectable()
 export class NovelService {
-  constructor() {}
+  browser;
+  constructor() {
+    this.init();
+  }
   async findAll(body: FindNovelDto) {
     const novels = getRepository(Novel)
       .createQueryBuilder('novel')
@@ -204,7 +207,6 @@ export class NovelService {
     let data = require('fs').readFileSync('test.csv', 'utf8');
     const donwloadImagePath = process.env.IMAGE_PATH;
     data = data.split('\r\n');
-    console.log(data, 'csv data');
     for (const value of data) {
       if (value !== '') {
         request(value, (error, response, html) => {
@@ -285,11 +287,11 @@ export class NovelService {
 
   async openPage(value, className?) {
     return new Promise(async (resolve, reject) => {
-      const browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      });
-      browser.newPage().then(async (page) => {
+      // const browser = await puppeteer.launch({
+      //   headless: true,
+      //   args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      // });
+      this.browser.newPage().then(async (page) => {
         try {
           await page.goto(value);
           if (className) {
@@ -320,7 +322,6 @@ export class NovelService {
           html += `${p.toString()}</p>`;
           datapase += html;
         }
-        console.log(p);
       })
       const fileName = `${new Date().getTime().toString()}.txt`;
       const filePath = process.env.CHAPTER_FILES + fileName
@@ -334,9 +335,18 @@ export class NovelService {
 
       };
       getRepository(Chapter).save(chapterDto);
-      console.log(chapter);
     } catch (e) {
       Error(e);
     }
+  }
+
+   init() {
+    puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    })
+        .then(value => {
+          this.browser = value;
+        });
   }
 }
