@@ -323,14 +323,15 @@ export class NovelService {
         }
         console.log(p);
       })
-      const fileName = new Date().getTime().toString();
+      const fileName = `${new Date().getTime().toString()}.txt`;
       const filePath = process.env.CHAPTER_FILES + fileName
       fs.writeFileSync(filePath, datapase);
       const chapterDto = {
         name: value.name,
         uniqueName: value.uniqueName,
         description: null,
-        content: fileName
+        content: fileName,
+        novelId: novel.id
       }
       getRepository(Chapter).save(chapterDto);
       console.log(chapter);
