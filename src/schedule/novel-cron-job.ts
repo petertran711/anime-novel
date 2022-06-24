@@ -1,13 +1,17 @@
-import { Injectable } from '@nestjs/common';
-import { Cron, SchedulerRegistry } from '@nestjs/schedule';
-import {NovelService} from "../novel/novel.service";
+import { Inject, Injectable, Logger, LoggerService } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
+import { NovelService } from '../novel/novel.service';
 
 @Injectable()
 export class NovelCronJobService {
-  constructor(private schedulerRegistry: SchedulerRegistry
-  ) {}
-  @Cron('*/10 * * * * *')
+  constructor(
+    @Inject(Logger) private readonly logger: LoggerService,
+  private novelServices: NovelService) {}
+  @Cron('*/2 * * * *')
   async crawlNovel() {
-    // this.novelServices.crawlNovels()
+    this.logger.log('Run cron job after 2 min');
+    return this.novelServices.crawlNovels().catch((e) => {
+      this.logger.error('Cannot craw novle', e);
+    });
   }
 }
