@@ -305,7 +305,10 @@ export class NovelService {
         } catch (e) {
           reject(e);
         }
-      });
+      })
+          .catch(e => {
+            console.log(e);
+          });
     });
   }
 
@@ -324,7 +327,7 @@ export class NovelService {
         }
       })
       const fileName = `${new Date().getTime().toString()}.txt`;
-      const filePath = process.env.CHAPTER_FILES + fileName
+      const filePath = fileName
       fs.writeFileSync(filePath, datapase);
       const chapterDto = {
         name: value.name,
@@ -347,6 +350,9 @@ export class NovelService {
     })
         .then(value => {
           this.browser = value;
+        })
+        .catch(e => {
+          console.log(e);
         });
   }
 }
