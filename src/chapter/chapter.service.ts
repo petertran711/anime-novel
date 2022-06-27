@@ -24,10 +24,15 @@ export class ChapterService {
     if (!createChapterDto.uniqueName) {
       createChapterDto.uniqueName = createUniqName(createChapterDto.name);
     }
-    console.log('createChapterDto', createChapterDto);
     const data = Object.assign({}, createChapterDto, {
       novel,
     });
+    const checkUniqueName = await getRepository(Chapter).findOne({
+      where: {
+        uniqueName: data.uniqueName,
+      },
+    });
+    if (checkUniqueName) throw new NotFoundException('Trùng unique Name');
     return getRepository(Chapter).save(data);
   }
 

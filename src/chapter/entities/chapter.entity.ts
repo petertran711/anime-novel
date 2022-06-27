@@ -18,7 +18,7 @@ export class Chapter {
   @Column({ nullable: true })
   description: string;
 
-  @Column({ nullable: true, unique: true })
+  @Column({ nullable: true, unique: false })
   uniqueName: string;
 
   @Column({ nullable: true })
