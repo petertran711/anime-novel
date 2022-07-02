@@ -19,7 +19,9 @@ export class ChapterService {
     });
     if (!novel) throw new NotFoundException('Novel khong ton tai');
     if (!createChapterDto.episode) {
-      createChapterDto.episode = novel.chapters[novel.chapters.length - 1].episode + 1;
+      createChapterDto.episode = novel.chapters[novel.chapters.length - 1].episode
+        ? novel.chapters[novel.chapters.length - 1].episode + 1
+        : 1;
     }
     if (!createChapterDto.uniqueName) {
       createChapterDto.uniqueName = createUniqName(createChapterDto.name);
