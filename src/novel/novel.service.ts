@@ -334,10 +334,11 @@ export class NovelService {
         uniqueName: value.uniqueName,
         description: null,
         content: fileName,
-        novelId: novel.id
+        novel: novel
 
       };
-      getRepository(Chapter).save(chapterDto);
+      const chapte1r = await getRepository(Chapter).save(chapterDto);
+      console.log(chapte1r);
     } catch (e) {
       Error(e);
     }
