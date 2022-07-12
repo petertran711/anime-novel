@@ -25,7 +25,7 @@ export class TagService {
       tags.take(body.limit);
     }
 
-    if (body.limit !== undefined && body.limit !== null && body.skip) {
+    if (body.skip !== undefined && body.skip !== null && body.skip) {
       tags.skip(body.skip);
     }
 

@@ -64,7 +64,7 @@ export class NovelService {
       novels.take(body.limit);
     }
 
-    if (body.limit !== undefined && body.limit !== null && body.skip) {
+    if (body.skip !== undefined && body.skip !== null && body.skip) {
       novels.skip(body.skip);
     }
 
@@ -136,7 +136,7 @@ export class NovelService {
       novels.take(body.limit);
     }
 
-    if (body.limit !== undefined && body.limit !== null && body.skip) {
+    if (body.skip !== undefined && body.skip !== null && body.skip) {
       novels.skip(body.skip);
     }
 

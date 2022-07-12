@@ -39,13 +39,20 @@ export class ChapterService {
   }
 
   findAll(body: FindChapterDto) {
-    const chapter = getRepository(Chapter).createQueryBuilder('novel');
+    const chapter = getRepository(Chapter).createQueryBuilder('chapter').leftJoinAndSelect('chapter.novel', 'novel');
 
     if (body.uniqueName) {
       chapter.andWhere('novel.uniqueName =:uniqueName', { uniqueName: body.uniqueName });
     }
+    if (body.limit !== undefined && body.limit !== null) {
+      chapter.take(body.limit);
+    }
 
-    return chapter.getMany();
+    if (body.skip !== undefined && body.skip !== null && body.skip) {
+      chapter.skip(body.skip);
+    }
+
+    return chapter.getManyAndCount();
   }
 
   findOne(id: number) {
