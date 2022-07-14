@@ -291,24 +291,29 @@ export class NovelService {
       //   headless: true,
       //   args: ['--no-sandbox', '--disable-setuid-sandbox'],
       // });
-      this.browser.newPage().then(async (page) => {
-        try {
-          await page.goto(value);
-          if (className) {
-            await page.waitForSelector(`.${className}`, { timeout: 2000 });
+      if (!this.browser) {
+        this.init();
+      }
+      else {
+        this.browser.newPage().then(async (page) => {
+          try {
+            await page.goto(value);
+            if (className) {
+              await page.waitForSelector(`.${className}`, { timeout: 2000 });
+            }
+            const body = await page.evaluate(() => {
+              return document.querySelector('body').innerHTML;
+            });
+            await page.close();
+            resolve(body);
+          } catch (e) {
+            reject(e);
           }
-          const body = await page.evaluate(() => {
-            return document.querySelector('body').innerHTML;
-          });
-          await page.close();
-          resolve(body);
-        } catch (e) {
-          reject(e);
-        }
-      })
-          .catch(e => {
-            console.log(e);
-          });
+        })
+            .catch(e => {
+              console.log(e);
+            });
+      }
     });
   }
 
