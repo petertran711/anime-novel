@@ -252,29 +252,47 @@ export class NovelService {
   async crawlNovels() {
     const allNovel = await this.findAll({});
     for (let novel of allNovel[0]) {
-      if (novel.sourceLink) {
-        this.openPage(novel.sourceLink, 'wp-manga-chapter')
+      if (novel.sourceLink && novel.sourceLink.startsWith('https://novelfull.com/')) {
+        this.openPage(novel.sourceLink)
           .then(async (body) => {
             // fs.writeFileSync('data.html', body);
             const $ = cheerio.load(body);
             const urls = [];
-            $('.wp-manga-chapter').each((index, el) => {
-              let link = $(el).find('a').attr('href');
-              let nameChapter = $(el).find('a').text();
-              const att = link.split('/');
-              const name = [];
-              att.forEach((value) => {
-                if (value !== '') {
-                  name.push(value);
+            if (novel.sourceLink.startsWith('https://novelfull.com/')) {
+              let ul = $('.list-chapter > li').each((index, el) => {
+                let link = `https://novelfull.com${$(el).find('a').attr('href')}`;
+                let nameChapter = $(el).find('a').text();
+                const att = link.split('/');
+                const name = [];
+                att.forEach((value) => {
+                  if (value !== '') {
+                    name.push(value.replace('.html',''));
+                  }
+                });
+                const current = novel.chapters.find((value) => value.uniqueName === name[name.length - 1]);
+                if (!current) {
+                  urls.push({ url: link, name: nameChapter, uniqueName: name[name.length - 1] });
+                }
+              })
+            } else {
+              $('.wp-manga-chapter').each((index, el) => {
+                let link = $(el).find('a').attr('href');
+                let nameChapter = $(el).find('a').text();
+                const att = link.split('/');
+                const name = [];
+                att.forEach((value) => {
+                  if (value !== '') {
+                    name.push(value);
+                  }
+                });
+                const current = novel.chapters.find((value) => value.uniqueName === name[name.length - 1]);
+                if (!current) {
+                  urls.push({ url: link, name: nameChapter, uniqueName: name[name.length - 1] });
                 }
               });
-              const current = novel.chapters.find((value) => value.uniqueName === name[name.length - 1]);
-              if (!current) {
-                urls.push({ url: link, name: nameChapter, uniqueName: name[name.length - 1] });
-              }
-            });
+            }
             //  this.getChapter(urls[0], novel);
-            for (let url of urls) {
+            for (let url of urls.reverse()) {
               await this.getChapter(url, novel);
             }
           })
