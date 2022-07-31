@@ -19,6 +19,7 @@ export class InAppNotificationService {
   async findAll({ userId, isRead, skip, limit }: FindInAppNotificationDto) {
     const notifications = this.notificationRepository
       .createQueryBuilder('notification')
+        .leftJoinAndSelect('notification.user','user')
       .orderBy('notification.createdAt', 'DESC');
     if (userId) {
       notifications.andWhere(`user.id = :id`, { id: userId });
