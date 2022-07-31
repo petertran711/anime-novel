@@ -23,10 +23,9 @@ export class NovelService {
   async findAll(body: FindNovelDto) {
     const novels = getRepository(Novel)
       .createQueryBuilder('novel')
-      .leftJoinAndSelect('novel.chapters', 'chapters')
       .leftJoinAndSelect('novel.categories', 'category')
       .leftJoinAndSelect('novel.tags', 'tag')
-      .select(['novel', 'chapters', 'category.id', 'category.name', 'tag.id', 'tag.name', 'tag.uniqueName'])
+      .select(['novel', 'category.id', 'category.name', 'tag.id', 'tag.name', 'tag.uniqueName'])
       .orderBy('novel.updatedAt', 'DESC');
 
     if (body.name) {
@@ -73,7 +72,11 @@ export class NovelService {
   }
 
   findOne(id: number) {
-    return getRepository(Novel).findOne(id);
+    return getRepository(Novel)
+      .createQueryBuilder('novel')
+      .leftJoinAndSelect('novel.chapters', 'chapter')
+      .select(['novel','chapter.id', 'chapter.name'])
+      .andWhere('novel.id =:id', { id: id }).getOne();
   }
 
   async getByRanking() {
@@ -348,17 +351,16 @@ export class NovelService {
           html += `${p.toString()}</p>`;
           datapase += html;
         }
-      })
+      });
       const fileName = `${new Date().getTime().toString()}.txt`;
-      const filePath = fileName
+      const filePath = fileName;
       fs.writeFileSync(filePath, datapase);
       const chapterDto = {
         name: value.name,
         uniqueName: value.uniqueName,
         description: null,
         content: fileName,
-        novel: novel
-
+        novel: novel,
       };
       const chapte1r = await getRepository(Chapter).save(chapterDto);
       console.log(chapte1r);
@@ -367,16 +369,17 @@ export class NovelService {
     }
   }
 
-   init() {
-    puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-    })
-        .then(value => {
-          this.browser = value;
-        })
-        .catch(e => {
-          console.log(e);
-        });
+  init() {
+    puppeteer
+      .launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      })
+      .then((value) => {
+        this.browser = value;
+      })
+      .catch((e) => {
+        console.log(e);
+      });
   }
 }
