@@ -7,10 +7,14 @@ export class FindChapterDto {
     @IsOptional()
     uniqueName?: string;
 
+    @ApiProperty()
+    @IsOptional()
+    novelUniqueName?: string;
+
     @Transform(({ value }) => parseInt(value))
     @IsOptional()
     limit?: number;
-  
+
     @Transform(({ value }) => parseInt(value))
     @IsOptional()
     skip?: number;

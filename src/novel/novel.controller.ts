@@ -32,6 +32,7 @@ export class NovelController {
     return this.novelService.createNovelBySource();
   }
 
+
   @Get('/crawlNovel')
   crawlNovel() {
     return this.novelService.crawlNovels();
@@ -45,6 +46,11 @@ export class NovelController {
   @Get('/weeklyMostActive')
   weeklyMostActive() {
     return this.novelService.weeklyMostActive();
+  }
+
+  @Get('/:id/userHasBookmark')
+  userHasBookmark(@Param('id') id: string,) {
+    return this.novelService.getUserBookmark(id);
   }
 
   @Get(':id')

@@ -17,3 +17,7 @@ export enum Role {
 export enum Status {
   Ongoing = 'Ongoing'
 }
+
+export enum NotificationType {
+  NewChapter = 'NewChapter'
+}

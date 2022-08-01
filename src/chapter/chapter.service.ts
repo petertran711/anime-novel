@@ -42,7 +42,11 @@ export class ChapterService {
     const chapter = getRepository(Chapter).createQueryBuilder('chapter').leftJoinAndSelect('chapter.novel', 'novel');
 
     if (body.uniqueName) {
-      chapter.andWhere('novel.uniqueName =:uniqueName', { uniqueName: body.uniqueName });
+      chapter.andWhere('chapter.uniqueName =:uniqueName', { uniqueName: body.uniqueName });
+    }
+
+    if (body.novelUniqueName) {
+      chapter.andWhere('novel.uniqueName =:uniqueName', { uniqueName: body.novelUniqueName });
     }
     if (body.limit !== undefined && body.limit !== null) {
       chapter.take(body.limit);
@@ -51,7 +55,7 @@ export class ChapterService {
     if (body.skip !== undefined && body.skip !== null && body.skip) {
       chapter.skip(body.skip);
     }
-
+    console.log(chapter.getQuery(), 'tan query');
     return chapter.getManyAndCount();
   }
 

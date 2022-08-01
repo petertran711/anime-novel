@@ -21,6 +21,7 @@ import { NovelCronJobService } from './schedule/novel-cron-job';
 import { TagSearchLogModule } from './tag-search-log/tag-search-log.module';
 import { TagModule } from './tag/tag.module';
 import { UsersModule } from './users/users.module';
+import {ChapterService} from "./chapter/chapter.service";
 
 const cookieSession = require('cookie-session');
 
@@ -94,6 +95,7 @@ const cookieSession = require('cookie-session');
     },
     NovelCronJobService,
     NovelService,
+      ChapterService,
     Logger
   ],
 })

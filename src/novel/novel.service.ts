@@ -4,12 +4,17 @@ import { createUniqName, donwloadFileFromURL } from 'src/helpers/ultils';
 import { Tag } from 'src/tag/entities/tag.entity';
 import { getRepository, In } from 'typeorm';
 import { Chapter } from '../chapter/entities/chapter.entity';
-import { Status } from '../helpers/enum';
+import {NotificationType, Status} from '../helpers/enum';
 import { CreateNovelDto } from './dto/create-novel.dto';
 import { FindNovelAdvDto } from './dto/find-novel-adv.dto';
 import { FindNovelDto } from './dto/find-novel.dto';
 import { UpdateNovelDto } from './dto/update-novel.dto';
 import { Novel } from './entities/novel.entity';
+import {BookmarkDto} from "../users/dtos/bookmark.dto";
+import {User} from "../users/user.entity";
+import {InAppNotification} from "../in-app-notification/entities/in-app-notification.entity";
+import {val} from "cheerio/lib/api/attributes";
+import {ChapterService} from "../chapter/chapter.service";
 const cheerio = require('cheerio'); // khai báo module cheerio
 const fs = require('fs');
 const request = require('request-promise'); // khai báo module request-promise
@@ -17,7 +22,7 @@ const puppeteer = require('puppeteer');
 @Injectable()
 export class NovelService {
   browser;
-  constructor() {
+  constructor(private readonly chapterService: ChapterService) {
     this.init();
   }
   async findAll(body: FindNovelDto) {
@@ -262,19 +267,20 @@ export class NovelService {
             const $ = cheerio.load(body);
             const urls = [];
             if (novel.sourceLink.startsWith('https://novelfull.com/')) {
-              let ul = $('.list-chapter > li').each((index, el) => {
+              let ul = $('.list-chapter > li').each(async (index, el) => {
                 let link = `https://novelfull.com${$(el).find('a').attr('href')}`;
                 let nameChapter = $(el).find('a').text();
                 const att = link.split('/');
                 const name = [];
                 att.forEach((value) => {
                   if (value !== '') {
-                    name.push(value.replace('.html',''));
+                    name.push(value.replace('.html', ''));
                   }
                 });
+                const currentChapter = await this.chapterService.findAll({novelUniqueName: novel.uniqueName});
                 const current = novel.chapters.find((value) => value.uniqueName === name[name.length - 1]);
                 if (!current) {
-                  urls.push({ url: link, name: nameChapter, uniqueName: name[name.length - 1] });
+                  urls.push({url: link, name: nameChapter, uniqueName: name[name.length - 1]});
                 }
               })
             } else {
@@ -355,14 +361,32 @@ export class NovelService {
       const fileName = `${new Date().getTime().toString()}.txt`;
       const filePath = fileName;
       fs.writeFileSync(filePath, datapase);
+      const uniqueName = value.uniqueName.split('-');
+      const ep = uniqueName[uniqueName.indexOf('chapter') + 1];
       const chapterDto = {
         name: value.name,
         uniqueName: value.uniqueName,
         description: null,
         content: fileName,
         novel: novel,
+        episode: ep || 0
       };
       const chapte1r = await getRepository(Chapter).save(chapterDto);
+      const userBookmark: any[] = await this.getUserBookmark(novel.id);
+      const req = [];
+      userBookmark[0].forEach(user => {
+        const notificationDto = {
+          "title": `${novel.name} has a new chapter`,
+          "message": `${novel.name} has a new chapter ${value.name}`,
+          "type": NotificationType.NewChapter,
+          "isRead": false,
+          "user": {
+            "id": user.id
+          }
+        }
+        req.push(getRepository(InAppNotification).save(notificationDto));
+      })
+      Promise.all(req);
       console.log(chapte1r);
     } catch (e) {
       Error(e);
@@ -381,5 +405,23 @@ export class NovelService {
       .catch((e) => {
         console.log(e);
       });
+  }
+
+  async getUserBookmark(novelId: any) {
+    if (!novelId) {
+      throw new NotFoundException('Thiếu novelId');
+    }
+    const currentNovelData = await this.findOne(novelId);
+
+    if (currentNovelData) {
+        const coursesQuery = getRepository(User)
+            .createQueryBuilder('user')
+            .select('user.id')
+            .orderBy('user.updatedAt', 'DESC')
+            .andWhere('user.bookmark LIKE :novelId', { novelId: `%${novelId}%` })
+        const courses = await coursesQuery.getManyAndCount();
+        return courses;
+      }
+      return [[], 0];
   }
 }
