@@ -1,7 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { createUniqName } from 'src/helpers/ultils';
+import { InAppNotification } from 'src/in-app-notification/entities/in-app-notification.entity';
 import { Novel } from 'src/novel/entities/novel.entity';
-import { getRepository } from 'typeorm';
+import { User } from 'src/users/user.entity';
+import { getRepository, IsNull, Not } from 'typeorm';
 import { CreateChapterDto } from './dto/create-chapter.dto';
 import { FindChapterDto } from './dto/find-chapter.dto';
 import { UpdateChapterDto } from './dto/update-chapter.dto';
@@ -35,6 +37,27 @@ export class ChapterService {
       },
     });
     if (checkUniqueName) throw new NotFoundException('Trùng unique Name');
+    const userHasBookmark = await getRepository(User).find({
+      where: {
+        bookmark: Not(IsNull()),
+      },
+    });
+    if (userHasBookmark.length > 0) {
+      const listUser = userHasBookmark.filter((it) =>
+        it.bookmark.find((it1) => it1.toString() == createChapterDto.novelId.toString()),
+      );
+      if (listUser.length > 0) {
+        await Promise.all(
+          userHasBookmark.map(async (it) => {
+            await getRepository(InAppNotification).save({
+              user: it,
+              title: 'New chapter updated',
+              message: `New chapter of novel ${novel.name} was created`,
+            } as InAppNotification);
+          }),
+        );
+      }
+    }
     return getRepository(Chapter).save(data);
   }
 
