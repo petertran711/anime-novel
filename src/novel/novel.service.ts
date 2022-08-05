@@ -264,45 +264,51 @@ export class NovelService {
         this.openPage(novel.sourceLink)
           .then(async (body) => {
             // fs.writeFileSync('data.html', body);
-            const $ = cheerio.load(body);
-            const urls = [];
-            if (novel.sourceLink.startsWith('https://novelfull.com/')) {
-              let ul = $('.list-chapter > li').each(async (index, el) => {
-                let link = `https://novelfull.com${$(el).find('a').attr('href')}`;
-                let nameChapter = $(el).find('a').text();
-                const att = link.split('/');
-                const name = [];
-                att.forEach((value) => {
-                  if (value !== '') {
-                    name.push(value.replace('.html', ''));
+            try {
+              const $ = cheerio.load(body);
+              const urls = [];
+              if (novel.sourceLink.startsWith('https://novelfull.com/')) {
+                await $('.list-chapter > li').each(async (index, el) => {
+                  let link = `https://novelfull.com${$(el).find('a').attr('href')}`;
+                  let nameChapter = $(el).find('a').text();
+                  const att = link.split('/');
+                  const name = [];
+                  att.forEach((value) => {
+                    if (value !== '') {
+                      name.push(value.replace('.html', ''));
+                    }
+                  });
+                  const currentChapter = await this.chapterService.findAll({
+                    uniqueName: name[name.length - 1],
+                    novelUniqueName: novel.uniqueName
+                  });
+                  if (!currentChapter || currentChapter[0].length === 0) {
+                    await this.getChapter({url: link, name: nameChapter, uniqueName: name[name.length - 1]}, novel);
+                  }
+                })
+              } else {
+                $('.wp-manga-chapter').each(async (index, el) => {
+                  let link = $(el).find('a').attr('href');
+                  let nameChapter = $(el).find('a').text();
+                  const att = link.split('/');
+                  const name = [];
+                  att.forEach((value) => {
+                    if (value !== '') {
+                      name.push(value);
+                    }
+                  });
+                  const currentChapter = await this.chapterService.findAll({
+                    uniqueName: name[name.length - 1],
+                    novelUniqueName: novel.uniqueName
+                  });
+                  if (!currentChapter || currentChapter[0].length === 0) {
+                    await this.getChapter({url: link, name: nameChapter, uniqueName: name[name.length - 1]}, novel);
                   }
                 });
-                const currentChapter = await this.chapterService.findAll({novelUniqueName: novel.uniqueName});
-                const current = novel.chapters.find((value) => value.uniqueName === name[name.length - 1]);
-                if (!current) {
-                  urls.push({url: link, name: nameChapter, uniqueName: name[name.length - 1]});
-                }
-              })
-            } else {
-              $('.wp-manga-chapter').each((index, el) => {
-                let link = $(el).find('a').attr('href');
-                let nameChapter = $(el).find('a').text();
-                const att = link.split('/');
-                const name = [];
-                att.forEach((value) => {
-                  if (value !== '') {
-                    name.push(value);
-                  }
-                });
-                const current = novel.chapters.find((value) => value.uniqueName === name[name.length - 1]);
-                if (!current) {
-                  urls.push({ url: link, name: nameChapter, uniqueName: name[name.length - 1] });
-                }
-              });
+              }
             }
-            //  this.getChapter(urls[0], novel);
-            for (let url of urls.reverse()) {
-              await this.getChapter(url, novel);
+            catch (e) {
+              console.log(e);
             }
           })
           .catch((e) => {
@@ -380,13 +386,11 @@ export class NovelService {
           "message": `${novel.name} has a new chapter ${value.name}`,
           "type": NotificationType.NewChapter,
           "isRead": false,
-          "user": {
-            "id": user.id
-          }
-        }
+          "user": user
+        } as InAppNotification;
         req.push(getRepository(InAppNotification).save(notificationDto));
       })
-      Promise.all(req);
+      await Promise.all(req);
       console.log(chapte1r);
     } catch (e) {
       Error(e);
@@ -416,7 +420,6 @@ export class NovelService {
     if (currentNovelData) {
         const coursesQuery = getRepository(User)
             .createQueryBuilder('user')
-            .select('user.id')
             .orderBy('user.updatedAt', 'DESC')
             .andWhere('user.bookmark LIKE :novelId', { novelId: `%${novelId}%` })
         const courses = await coursesQuery.getManyAndCount();
