@@ -10,8 +10,8 @@ export class NovelCronJobService {
   @Cron('* * * * *')
   async crawlNovel() {
     this.logger.log('Run cron job after 1 min');
-    return this.novelServices.crawlNovels().catch((e) => {
-      this.logger.error('Cannot craw novle', e);
-    });
+    // return this.novelServices.crawlNovels().catch((e) => {
+    //   this.logger.error('Cannot craw novle', e);
+    // });
   }
 }

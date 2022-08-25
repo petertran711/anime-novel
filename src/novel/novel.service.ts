@@ -3,18 +3,16 @@ import { Category } from 'src/category/entities/category.entity';
 import { createUniqName, donwloadFileFromURL } from 'src/helpers/ultils';
 import { Tag } from 'src/tag/entities/tag.entity';
 import { getRepository, In } from 'typeorm';
+import { ChapterService } from "../chapter/chapter.service";
 import { Chapter } from '../chapter/entities/chapter.entity';
-import {NotificationType, Status} from '../helpers/enum';
+import { NotificationType, Status } from '../helpers/enum';
+import { InAppNotification } from "../in-app-notification/entities/in-app-notification.entity";
+import { User } from "../users/user.entity";
 import { CreateNovelDto } from './dto/create-novel.dto';
 import { FindNovelAdvDto } from './dto/find-novel-adv.dto';
 import { FindNovelDto } from './dto/find-novel.dto';
 import { UpdateNovelDto } from './dto/update-novel.dto';
 import { Novel } from './entities/novel.entity';
-import {BookmarkDto} from "../users/dtos/bookmark.dto";
-import {User} from "../users/user.entity";
-import {InAppNotification} from "../in-app-notification/entities/in-app-notification.entity";
-import {val} from "cheerio/lib/api/attributes";
-import {ChapterService} from "../chapter/chapter.service";
 const cheerio = require('cheerio'); // khai báo module cheerio
 const fs = require('fs');
 const request = require('request-promise'); // khai báo module request-promise
@@ -258,8 +256,8 @@ export class NovelService {
   }
 
   async crawlNovels() {
-    const allNovel = await this.findAll({});
-    for (let novel of allNovel[0]) {
+    const allNovel = await getRepository(Novel).find();
+    for (let novel of allNovel) {
       if (novel.sourceLink && novel.sourceLink.startsWith('https://novelfull.com/')) {
         this.openPage(novel.sourceLink)
           .then(async (body) => {
@@ -278,11 +276,15 @@ export class NovelService {
                       name.push(value.replace('.html', ''));
                     }
                   });
-                  const currentChapter = await this.chapterService.findAll({
-                    uniqueName: name[name.length - 1],
-                    novelUniqueName: novel.uniqueName
+                  const currentChapter = await getRepository(Chapter).find({
+                    where : {
+                      uniqueName : name[name.length - 1]
+                    }
+                  // }) l({
+                  //   uniqueName: name[name.length - 1],
+                  //   novelUniqueName: novel.uniqueName
                   });
-                  if (!currentChapter || currentChapter[0].length === 0) {
+                  if (!currentChapter || currentChapter.length === 0) {
                     await this.getChapter({url: link, name: nameChapter, uniqueName: name[name.length - 1]}, novel);
                   }
                 })
@@ -297,7 +299,7 @@ export class NovelService {
                       name.push(value);
                     }
                   });
-                  const currentChapter = await this.chapterService.findAll({
+                  const currentChapter =  this.chapterService.findAll({
                     uniqueName: name[name.length - 1],
                     novelUniqueName: novel.uniqueName
                   });
