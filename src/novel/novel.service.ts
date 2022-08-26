@@ -285,7 +285,7 @@ export class NovelService {
                   //   novelUniqueName: novel.uniqueName
                   });
                   if (!currentChapter || currentChapter.length === 0) {
-                    await this.getChapter({url: link, name: nameChapter, uniqueName: name[name.length - 1]}, novel);
+                    this.getChapter({url: link, name: nameChapter, uniqueName: name[name.length - 1]}, novel);
                   }
                 })
               } else {
@@ -304,7 +304,7 @@ export class NovelService {
                     novelUniqueName: novel.uniqueName
                   });
                   if (!currentChapter || currentChapter[0].length === 0) {
-                    await this.getChapter({url: link, name: nameChapter, uniqueName: name[name.length - 1]}, novel);
+                    this.getChapter({url: link, name: nameChapter, uniqueName: name[name.length - 1]}, novel);
                   }
                 });
               }
@@ -332,7 +332,7 @@ export class NovelService {
       else {
         this.browser.newPage().then(async (page) => {
           try {
-            await page.goto(value);
+            await page.goto(value, {timeout: 0});
             if (className) {
               await page.waitForSelector(`.${className}`, { timeout: 2000 });
             }
