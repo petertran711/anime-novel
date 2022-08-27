@@ -12,7 +12,7 @@ export class Chapter {
   @Column({ nullable: true })
   name: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: false })
   episode: number;
 
   @Column({ nullable: true })
