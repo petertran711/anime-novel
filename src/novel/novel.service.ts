@@ -268,7 +268,6 @@ export class NovelService {
           .then(async (body) => {
             // fs.writeFileSync('data.html', body);
             try {
-              if (novel.sourceLink.startsWith('https://novelfull.com/')) {
                 const $ = cheerio.load(body);
                 const chapters = [];
                 if (novel.sourceLink.startsWith('https://novelfull.com/')) {
@@ -348,7 +347,6 @@ export class NovelService {
                     }, chapter.novel, chapter.className);
                   }
                 }
-              }
             }
             catch (e) {
               console.log(e);
