@@ -1,61 +1,65 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Category } from 'src/category/entities/category.entity';
-import { createUniqName, donwloadFileFromURL } from 'src/helpers/ultils';
-import { Tag } from 'src/tag/entities/tag.entity';
-import { getRepository, In } from 'typeorm';
-import { Chapter } from '../chapter/entities/chapter.entity';
+import {Injectable, NotFoundException} from '@nestjs/common';
+import {Category} from 'src/category/entities/category.entity';
+import {createUniqName, donwloadFileFromURL} from 'src/helpers/ultils';
+import {Tag} from 'src/tag/entities/tag.entity';
+import {getRepository, In} from 'typeorm';
+import {Chapter} from '../chapter/entities/chapter.entity';
 import {NotificationType, Status} from '../helpers/enum';
-import { CreateNovelDto } from './dto/create-novel.dto';
-import { FindNovelAdvDto } from './dto/find-novel-adv.dto';
-import { FindNovelDto } from './dto/find-novel.dto';
-import { UpdateNovelDto } from './dto/update-novel.dto';
-import { Novel } from './entities/novel.entity';
+import {CreateNovelDto} from './dto/create-novel.dto';
+import {FindNovelAdvDto} from './dto/find-novel-adv.dto';
+import {FindNovelDto} from './dto/find-novel.dto';
+import {UpdateNovelDto} from './dto/update-novel.dto';
+import {Novel} from './entities/novel.entity';
 import {BookmarkDto} from "../users/dtos/bookmark.dto";
 import {User} from "../users/user.entity";
 import {InAppNotification} from "../in-app-notification/entities/in-app-notification.entity";
 import {val} from "cheerio/lib/api/attributes";
 import {ChapterService} from "../chapter/chapter.service";
 import {GlobalService} from "../helpers/Storage";
+
 const cheerio = require('cheerio'); // khai báo module cheerio
 const fs = require('fs');
 const request = require('request-promise'); // khai báo module request-promise
 const puppeteer = require('puppeteer');
+
 @Injectable()
 export class NovelService {
   browser;
+
   constructor(private readonly chapterService: ChapterService) {
     this.init();
   }
+
   async findAll(body: FindNovelDto) {
     const novels = getRepository(Novel)
         .createQueryBuilder('novel')
         .leftJoinAndSelect('novel.categories', 'category')
         .leftJoinAndSelect('novel.tags', 'tag')
         .leftJoinAndSelect('novel.chapters', 'chapter')
-        .select(['novel','chapter.uniqueName', 'category.id', 'category.name', 'tag.id', 'tag.name', 'tag.uniqueName'])
+        .select(['novel', 'chapter.uniqueName', 'category.id', 'category.name', 'tag.id', 'tag.name', 'tag.uniqueName'])
         .orderBy('novel.updatedAt', 'DESC');
 
     if (body.name) {
-      novels.andWhere('novel.name LIKE :name', { name: `%${body.name}%` });
+      novels.andWhere('novel.name LIKE :name', {name: `%${body.name}%`});
     }
     if (body.uniqueName) {
-      novels.andWhere('novel.uniqueName LIKE :uniqueName', { uniqueName: `%${body.uniqueName}%` });
+      novels.andWhere('novel.uniqueName LIKE :uniqueName', {uniqueName: `%${body.uniqueName}%`});
     }
     if (body.author) {
-      novels.andWhere('novel.author =:author', { author: body.author });
+      novels.andWhere('novel.author =:author', {author: body.author});
     }
     if (body.status) {
-      novels.andWhere('novel.status =:status', { status: body.status });
+      novels.andWhere('novel.status =:status', {status: body.status});
     }
     if (body.categoryId) {
-      novels.andWhere('category.id =:id', { id: body.categoryId });
+      novels.andWhere('category.id =:id', {id: body.categoryId});
     }
     if (body.tagUniqueName) {
-      novels.andWhere('tag.uniqueName LIKE :uniqueName', { uniqueName: `%${body.tagUniqueName}%` });
+      novels.andWhere('tag.uniqueName LIKE :uniqueName', {uniqueName: `%${body.tagUniqueName}%`});
     }
 
     if (body.tagId) {
-      novels.andWhere('tag.id =:id', { id: body.tagId });
+      novels.andWhere('tag.id =:id', {id: body.tagId});
     }
 
     if (body.orderByView) {
@@ -82,8 +86,8 @@ export class NovelService {
     return getRepository(Novel)
         .createQueryBuilder('novel')
         .leftJoinAndSelect('novel.chapters', 'chapter')
-        .select(['novel','chapter.id', 'chapter.name'])
-        .andWhere('novel.id =:id', { id: id }).getOne();
+        .select(['novel', 'chapter.id', 'chapter.name'])
+        .andWhere('novel.id =:id', {id: id}).getOne();
   }
 
   async getByRanking() {
@@ -110,12 +114,14 @@ export class NovelService {
     };
     return data;
   }
+
   async weeklyMostActive() {
     return getRepository(Novel).find({
       skip: 0,
       take: 10,
     });
   }
+
   async searchAdvance(body: FindNovelAdvDto) {
     const novels = getRepository(Novel)
         .createQueryBuilder('novel')
@@ -128,18 +134,18 @@ export class NovelService {
     if (body.categoryIds && body.categoryIds.length > 0) {
       const array = body.categoryIds;
       if (body.categoryCondition == 'OR') {
-        novels.orWhere('category.id IN(:...id)', { id: body.categoryIds });
+        novels.orWhere('category.id IN(:...id)', {id: body.categoryIds});
       }
       if (body.categoryCondition == 'AND') {
-        novels.andWhere('category.id IN(:...id)', { id: body.categoryIds });
+        novels.andWhere('category.id IN(:...id)', {id: body.categoryIds});
       }
     }
     if (body.tagIds && body.tagIds.length > 0) {
       if (body.tagCondition == 'OR') {
-        novels.orWhere('tag.id IN(:...id)', { id: body.tagIds });
+        novels.orWhere('tag.id IN(:...id)', {id: body.tagIds});
       }
       if (body.tagCondition == 'AND') {
-        novels.andWhere('tag.id IN(:...id)', { id: body.tagIds });
+        novels.andWhere('tag.id IN(:...id)', {id: body.tagIds});
       }
     }
     if (body.limit !== undefined && body.limit !== null) {
@@ -152,6 +158,7 @@ export class NovelService {
 
     return novels.getManyAndCount();
   }
+
   async update(id: number, updateNovelDto: UpdateNovelDto) {
     const existNovel = await getRepository(Novel).findOne(id);
     if (!existNovel) {
@@ -160,11 +167,12 @@ export class NovelService {
     const update = Object.assign({}, existNovel, updateNovelDto);
     return getRepository(Novel).save(update);
   }
+
   async create(data: CreateNovelDto) {
     let categories;
     let tags;
     if (data.categories) {
-      categories = await getRepository(Category).find({ where: { name: In(data.categories) } });
+      categories = await getRepository(Category).find({where: {name: In(data.categories)}});
       if (categories.length == 0) {
         const createCategories = [];
         data.categories.forEach((it) => {
@@ -209,7 +217,22 @@ export class NovelService {
           tags: tags,
         },
     );
-    return getRepository(Novel).save(novel);
+    novel.sourceLink = '';
+    const newNovel = await getRepository(Novel).save(novel);
+    const chapters = []
+    await this.crawlWithNew(data.sourceLink, newNovel, chapters);
+    for (const chapter of chapters) {
+      const crawling = GlobalService.globalVar.find(value => value.link === chapter.url);
+      if (!crawling) {
+        GlobalService.globalVar.push({link: chapter.url})
+        await this.getChapter({
+          url: chapter.url,
+          name: chapter.name,
+          uniqueName: chapter.uniqueName
+        }, chapter.novel, chapter.className);
+      }
+    }
+    return
   }
 
   async createNovelBySource() {
@@ -260,18 +283,16 @@ export class NovelService {
 
   async crawlNovels() {
     const allNovel = await this.findAll({});
-    const allChapter = await getRepository(Chapter).find({
-      relations: ['novel'],
-    })
     for (let novel of allNovel[0]) {
-      this.openPage(novel.sourceLink)
-          .then(async (body) => {
-            // fs.writeFileSync('data.html', body);
-            try {
+      if (novel.sourceLink && novel.sourceLink !== '') {
+        this.openPage(novel.sourceLink)
+            .then(async (body) => {
+              // fs.writeFileSync('data.html', body);
+              try {
                 const $ = cheerio.load(body);
                 const chapters = [];
                 if (novel.sourceLink.startsWith('https://novelfull.com/')) {
-                  await $('.list-chapter > li').each(async (index, el) => {
+                  $('.l-chapters > li').each(async (index, el) => {
                     let link = `https://novelfull.com${$(el).find('a').attr('href')}`;
                     let nameChapter = $(el).find('a').text();
                     const att = link.split('/');
@@ -288,19 +309,6 @@ export class NovelService {
                       novel: novel,
                       className: '.chapter-content'
                     })
-                    // const currentChapter  = await getRepository(Chapter).find({
-                    //   where: {
-                    //     uniqueName: name[name.length - 1]
-                    //   },
-                    //   relations: ['novel'],
-                    // });
-                    // // const currentChapter = await this.chapterService.findAll({
-                    // //   uniqueName: name[name.length - 1]
-                    // // });
-                    // const existChapter = currentChapter.find(value => value.novel.uniqueName === novel.uniqueName)
-                    // if (!existChapter) {
-                    //   await this.getChapter({url: link, name: nameChapter, uniqueName: name[name.length - 1]}, novel);
-                    // }
                   })
                 } else {
                   $('.wp-manga-chapter').each(async (index, el) => {
@@ -320,21 +328,9 @@ export class NovelService {
                       novel: novel,
                       className: '.text-left'
                     })
-                    // const currentChapter = await getRepository(Chapter).find({
-                    //   where: {
-                    //     uniqueName: name[name.length - 1]
-                    //   },
-                    //   relations: ['novel'],
-                    // });
-                    // // const currentChapters = await this.chapterService.findAll({
-                    // //   uniqueName: name[name.length - 1]
-                    // // });
-                    // const existChater = currentChapter.find((value: Chapter) => value.novel.uniqueName === novel.uniqueName)
-                    // if (!existChater) {
-                    //    await this.getChapter({url: link, name: nameChapter, uniqueName: name[name.length - 1]}, novel);
-                    // }
                   });
                 }
+                console.log(123);
                 for (const chapter of chapters) {
                   const currentChapter = chapter.novel.chapters.find(value => value.uniqueName === chapter.uniqueName);
                   const crawling = GlobalService.globalVar.find(value => value.link === chapter.url);
@@ -347,94 +343,82 @@ export class NovelService {
                     }, chapter.novel, chapter.className);
                   }
                 }
-            }
-            catch (e) {
-              console.log(e);
-            }
-          })
-          .catch((e) => {
-            Error(e);
-          });
-
+              } catch (e) {
+                console.log(e);
+              }
+            })
+            .catch((e) => {
+              Error(e);
+            });
+      }
     }
   }
 
-  async crawlWithNew($, chapters, novel, link) {
-    this.openPage(link)
-        .then(async (body) => {
-          // fs.writeFileSync('data.html', body);
-          try {
-            const $ = cheerio.load(body);
-            const chapters = [];
-            if (novel.sourceLink.startsWith('https://novelfull.com/')) {
-              await $('.list-chapter > li').each(async (index, el) => {
-                let link = `https://novelfull.com${$(el).find('a').attr('href')}`;
-                let nameChapter = $(el).find('a').text();
-                const att = link.split('/');
-                const name = [];
-                att.forEach((value) => {
-                  if (value !== '') {
-                    name.push(value.replace('.html', ''));
-                  }
-                });
-                chapters.push({
-                  name: nameChapter,
-                  uniqueName: name[name.length - 1],
-                  url: link,
-                  novel: novel,
-                  className: '.chapter-content'
-                })
-              })
-            } else {
-              $('.wp-manga-chapter').each(async (index, el) => {
-                let link = $(el).find('a').attr('href');
-                let nameChapter = $(el).find('a').text();
-                const att = link.split('/');
-                const name = [];
-                att.forEach((value) => {
-                  if (value !== '') {
-                    name.push(value);
-                  }
-                });
-                chapters.push({
-                  name: nameChapter,
-                  uniqueName: name[name.length - 1],
-                  url: link,
-                  novel: novel,
-                  className: '.text-left'
-                })
-              });
+  async crawlWithNew(link, novel, chapters) {
+    try {
+      const body = await this.openPage(link)
+      // fs.writeFileSync('data.html', body);
+      const $ = cheerio.load(body);
+      if (link.startsWith('https://novelfull.com/')) {
+        $('.list-chapter > li').each(async (index, el) => {
+          let link = `https://novelfull.com${$(el).find('a').attr('href')}`;
+          let nameChapter = $(el).find('a').text();
+          const att = link.split('/');
+          const name = [];
+          att.forEach((value) => {
+            if (value !== '') {
+              name.push(value.replace('.html', ''));
             }
-            for(const chapter of chapters) {
-              const currentChapter  = await getRepository(Chapter).find({
-                where: {
-                  uniqueName: chapter.uniqueName
-                },
-                relations: ['novel'],
-              });
-              const existChapter = currentChapter.find(value => value.novel.uniqueName === novel.uniqueName)
-              if (!existChapter) {
-                await this.getChapter({url: chapter.url, name: chapter.name, uniqueName: chapter.uniqueName}, chapter.novel, chapter.className);
-              }
-            }
-            const nextEl = $('.next').find('a').attr('href');
-            if (nextEl) {
-              let link = `https://novelfull.com${nextEl}`;
-              this.crawlWithNew($, chapters, novel, link);
-            }
-          }
-          catch (e) {
-            console.log(e);
-          }
+          });
+          chapters.push({
+            name: nameChapter,
+            uniqueName: name[name.length - 1],
+            url: link,
+            novel: novel,
+            className: '.chapter-content'
+          })
         })
-        .catch((e) => {
-          Error(e);
+      } else {
+        $('.wp-manga-chapter').each(async (index, el) => {
+          let link = $(el).find('a').attr('href');
+          let nameChapter = $(el).find('a').text();
+          const att = link.split('/');
+          const name = [];
+          att.forEach((value) => {
+            if (value !== '') {
+              name.push(value);
+            }
+          });
+          chapters.push({
+            name: nameChapter,
+            uniqueName: name[name.length - 1],
+            url: link,
+            novel: novel,
+            className: '.text-left'
+          })
         });
-    const nextEl = $('.next');
-    if (nextEl) {
-
+      }
+      // for(const chapter of chapters) {
+      //   const currentChapter  = await getRepository(Chapter).find({
+      //     where: {
+      //       uniqueName: chapter.uniqueName
+      //     },
+      //     relations: ['novel'],
+      //   });
+      //   const existChapter = currentChapter.find(value => value.novel.uniqueName === novel.uniqueName)
+      //   if (!existChapter) {
+      //     await this.getChapter({url: chapter.url, name: chapter.name, uniqueName: chapter.uniqueName}, chapter.novel, chapter.className);
+      //   }
+      // }
+      const nextEl = $('.next').find('a').attr('href');
+      // const nextEl = $('.next').find('a');
+      if (nextEl) {
+        let link = `https://novelfull.com${nextEl}`;
+        await this.crawlWithNew(link, novel, chapters);
+      }
+    } catch (e) {
+      console.log(e);
     }
-
   }
 
   async openPage(value, className?) {
@@ -445,13 +429,12 @@ export class NovelService {
       // });
       if (!this.browser) {
         this.init();
-      }
-      else {
+      } else {
         this.browser.newPage().then(async (page) => {
           try {
-            await page.goto(value, {waitUntil: 'load', timeout: 0});
+            await page.goto(value, {waitUntil: 'networkidle0', timeout: 0});
             if (className) {
-              await page.waitForSelector(`.${className}`, { timeout: 2000 });
+              await page.waitForSelector(`.${className}`, {timeout: 2000});
             }
             const body = await page.evaluate(() => {
               return document.querySelector('body').innerHTML;
@@ -476,13 +459,14 @@ export class NovelService {
       const content = new$(className).html()
       let datapase = '';
       new$(content).each((index, el) => {
-        let p = new$(el).find('p').html();
-        let html = '<p>';
+        let p = new$(el).text();
+        let html = '<p>'
         if (p) {
-          html += `${p.toString()}</p>`;
+          html += `${p.toString()}</p>`
           datapase += html;
         }
-      });
+        console.log(p);
+      })
       const fileName = `${new Date().getTime().toString()}.txt`;
       const filePath = fileName;
       fs.writeFileSync(filePath, datapase);
@@ -541,7 +525,7 @@ export class NovelService {
       const coursesQuery = getRepository(User)
           .createQueryBuilder('user')
           .orderBy('user.updatedAt', 'DESC')
-          .andWhere('user.bookmark LIKE :novelId', { novelId: `%${novelId}%` })
+          .andWhere('user.bookmark LIKE :novelId', {novelId: `%${novelId}%`})
       const courses = await coursesQuery.getManyAndCount();
       return courses;
     }
