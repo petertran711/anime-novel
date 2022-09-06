@@ -232,7 +232,8 @@ export class NovelService {
         }, chapter.novel, chapter.className);
       }
     }
-    return
+    newNovel.sourceLink = data.sourceLink;
+    return await getRepository(Novel).update(newNovel.id, newNovel);
   }
 
   async createNovelBySource() {
@@ -263,7 +264,6 @@ export class NovelService {
               tags.push(text);
             });
 
-            console.log(123);
             const myNovel: CreateNovelDto = {
               name: title.trim(),
               uniqueName: createUniqName(title.trim()),
@@ -330,7 +330,6 @@ export class NovelService {
                     })
                   });
                 }
-                console.log(123);
                 for (const chapter of chapters) {
                   const currentChapter = chapter.novel.chapters.find(value => value.uniqueName === chapter.uniqueName);
                   const crawling = GlobalService.globalVar.find(value => value.link === chapter.url);
@@ -465,7 +464,6 @@ export class NovelService {
           html += `${p.toString()}</p>`
           datapase += html;
         }
-        console.log(p);
       })
       const fileName = `${new Date().getTime().toString()}.txt`;
       const filePath = fileName;
