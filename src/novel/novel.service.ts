@@ -334,6 +334,7 @@ export class NovelService {
                   const currentChapter = chapter.novel.chapters.find(value => value.uniqueName === chapter.uniqueName);
                   const crawling = GlobalService.globalVar.find(value => value.link === chapter.url);
                   if (!currentChapter && !crawling) {
+                    console.log(currentChapter.uniqueName);
                     GlobalService.globalVar.push({link: chapter.url})
                     await this.getChapter({
                       url: chapter.url,

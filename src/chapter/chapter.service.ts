@@ -62,7 +62,8 @@ export class ChapterService {
   }
 
   findAll(body: FindChapterDto) {
-    const chapter = getRepository(Chapter).createQueryBuilder('chapter').leftJoinAndSelect('chapter.novel', 'novel');
+    const chapter = getRepository(Chapter).createQueryBuilder('chapter').leftJoinAndSelect('chapter.novel', 'novel')
+        .orderBy('chapter.episode', 'ASC');;
 
     if (body.uniqueName) {
       chapter.andWhere('chapter.uniqueName =:uniqueName', { uniqueName: body.uniqueName });
