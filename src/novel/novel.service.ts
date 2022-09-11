@@ -225,17 +225,17 @@ export class NovelService {
       const crawling = GlobalService.globalVar.find(value => value.link === chapter.url);
       if (!crawling) {
         GlobalService.globalVar.push({link: chapter.url})
+        const idx = chapters.indexOf(chapter);
         this.getChapter({
           url: chapter.url,
           name: chapter.name,
           uniqueName: chapter.uniqueName
-        }, chapter.novel, chapter.className);
-        const idx = chapters.indexOf(chapter);
-        if (idx === chapters.length - 1) {
-          newNovel.sourceLink = data.sourceLink;
-          const updateNovel = await getRepository(Novel).update(newNovel.id, {sourceLink: data.sourceLink});
-          console.log(updateNovel);
-        }
+        }, chapter.novel, chapter.className, idx === chapters.length - 1, data.sourceLink);
+        // if (idx === chapters.length - 1) {
+        //     newNovel.sourceLink = data.sourceLink;
+        //     const updateNovel = await getRepository(Novel).update(newNovel.id, {sourceLink: data.sourceLink});
+        //     console.log(updateNovel);
+        // }
       }
     }
     return newNovel;
@@ -478,7 +478,7 @@ export class NovelService {
     });
   }
 
-  async getChapter(value, novel, className) {
+  async getChapter(value, novel, className, isEnd?, source?) {
     try {
       const chapter = await this.openPage(value.url);
       const new$ = cheerio.load(chapter);
@@ -521,6 +521,9 @@ export class NovelService {
       await Promise.all(req);
       const deleteFromGlobal = GlobalService.globalVar.find(url => url.link === value.url);
       GlobalService.globalVar.splice(GlobalService.globalVar.indexOf(deleteFromGlobal), 1);
+      if (isEnd) {
+        await getRepository(Novel).update(novel.id, {sourceLink: source});
+      }
     } catch (e) {
       Error(e);
     }
