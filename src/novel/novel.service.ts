@@ -263,7 +263,7 @@ export class NovelService {
               const text = $(el).text();
               tags.push(text);
             });
-
+            
             const myNovel: CreateNovelDto = {
               name: title.trim(),
               uniqueName: createUniqName(title.trim()),
@@ -334,7 +334,6 @@ export class NovelService {
                   const currentChapter = chapter.novel.chapters.find(value => value.uniqueName === chapter.uniqueName);
                   const crawling = GlobalService.globalVar.find(value => value.link === chapter.url);
                   if (!currentChapter && !crawling) {
-                    console.log(currentChapter.uniqueName);
                     GlobalService.globalVar.push({link: chapter.url})
                     await this.getChapter({
                       url: chapter.url,
@@ -398,20 +397,7 @@ export class NovelService {
           })
         });
       }
-      // for(const chapter of chapters) {
-      //   const currentChapter  = await getRepository(Chapter).find({
-      //     where: {
-      //       uniqueName: chapter.uniqueName
-      //     },
-      //     relations: ['novel'],
-      //   });
-      //   const existChapter = currentChapter.find(value => value.novel.uniqueName === novel.uniqueName)
-      //   if (!existChapter) {
-      //     await this.getChapter({url: chapter.url, name: chapter.name, uniqueName: chapter.uniqueName}, chapter.novel, chapter.className);
-      //   }
-      // }
       const nextEl = $('.next').find('a').attr('href');
-      // const nextEl = $('.next').find('a');
       if (nextEl) {
         let link = `https://novelfull.com${nextEl}`;
         await this.crawlWithNew(link, novel, chapters);
@@ -431,6 +417,40 @@ export class NovelService {
         this.init();
       } else {
         this.browser.newPage().then(async (page) => {
+          const blocked_domains = [
+            'googlesyndication.com',
+            'adservice.google.com',
+            'google-analytics.com',
+            'trends.revcontent.com',
+            'assets.revcontent.com',
+            'js.ad-score.com',
+            'img.revcontent.com',
+            'cdn.revcontent.com',
+            'yeet.revcontent.com',
+            'data.ad-score.com',
+            'gum.criteo.com',
+            'api.rlcdn.com',
+            'id.crwdcntrl.net',
+            'mug.criteo.com',
+            'services.vlitag.com',
+            'assets.vlitag.com',
+            'googletagservices.com',
+            'imasdk.googleapis.com',
+            'securepubads.g.doubleclick.net',
+            'cdn.jsdelivr.net',
+            'px.vliplatform.com',
+            'media.vlitag.com'
+          ];
+
+          await page.setRequestInterception(true);
+          page.on('request', request => {
+            const url = request.url()
+            if (blocked_domains.some(domain => url.includes(domain))) {
+              request.abort();
+            } else {
+              request.continue();
+            }
+          });
           try {
             await page.goto(value, {waitUntil: 'networkidle0', timeout: 0});
             if (className) {
@@ -501,10 +521,47 @@ export class NovelService {
   }
 
   init() {
+    const minimal_args = [
+      '--autoplay-policy=user-gesture-required',
+      '--disable-background-networking',
+      '--disable-background-timer-throttling',
+      '--disable-backgrounding-occluded-windows',
+      '--disable-breakpad',
+      '--disable-client-side-phishing-detection',
+      '--disable-component-update',
+      '--disable-default-apps',
+      '--disable-dev-shm-usage',
+      '--disable-domain-reliability',
+      '--disable-extensions',
+      '--disable-features=AudioServiceOutOfProcess',
+      '--disable-hang-monitor',
+      '--disable-ipc-flooding-protection',
+      '--disable-notifications',
+      '--disable-offer-store-unmasked-wallet-cards',
+      '--disable-popup-blocking',
+      '--disable-print-preview',
+      '--disable-prompt-on-repost',
+      '--disable-renderer-backgrounding',
+      '--disable-setuid-sandbox',
+      '--disable-speech-api',
+      '--disable-sync',
+      '--hide-scrollbars',
+      '--ignore-gpu-blacklist',
+      '--metrics-recording-only',
+      '--mute-audio',
+      '--no-default-browser-check',
+      '--no-first-run',
+      '--no-pings',
+      '--no-sandbox',
+      '--no-zygote',
+      '--password-store=basic',
+      '--use-gl=swiftshader',
+      '--use-mock-keychain',
+    ];
     puppeteer
         .launch({
           headless: true,
-          args: ['--no-sandbox', '--disable-setuid-sandbox'],
+          args: minimal_args,
         })
         .then((value) => {
           this.browser = value;
