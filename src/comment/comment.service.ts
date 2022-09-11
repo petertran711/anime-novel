@@ -30,7 +30,7 @@ export class CommentService {
     .leftJoinAndSelect('comment.parent','parent')
     .leftJoinAndSelect('comment.user','user')
     .leftJoinAndSelect('comment.novel','novel').
-    select(['comment', 'parent', 'user.id','user.email', 'novel' ]);
+    select(['comment', 'parent', 'user.id','user.email', 'user.avatar', 'novel' ]);
     if (body.userId) {
       comment.andWhere('comment.userId', { userId: body.userId });
     }

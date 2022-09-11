@@ -225,15 +225,20 @@ export class NovelService {
       const crawling = GlobalService.globalVar.find(value => value.link === chapter.url);
       if (!crawling) {
         GlobalService.globalVar.push({link: chapter.url})
-        await this.getChapter({
+        this.getChapter({
           url: chapter.url,
           name: chapter.name,
           uniqueName: chapter.uniqueName
         }, chapter.novel, chapter.className);
+        const idx = chapters.indexOf(chapter);
+        if (idx === chapters.length - 1) {
+          newNovel.sourceLink = data.sourceLink;
+          const updateNovel = await getRepository(Novel).update(newNovel.id, {sourceLink: data.sourceLink});
+          console.log(updateNovel);
+        }
       }
     }
-    newNovel.sourceLink = data.sourceLink;
-    return await getRepository(Novel).update(newNovel.id, newNovel);
+    return newNovel;
   }
 
   async createNovelBySource() {
@@ -263,7 +268,8 @@ export class NovelService {
               const text = $(el).text();
               tags.push(text);
             });
-            
+
+            console.log(123);
             const myNovel: CreateNovelDto = {
               name: title.trim(),
               uniqueName: createUniqName(title.trim()),
