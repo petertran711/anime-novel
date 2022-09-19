@@ -43,8 +43,6 @@ export class UsersService {
   }: FindUserDto) {
     const user = getRepository(User)
       .createQueryBuilder('user')
-      .leftJoinAndSelect('user.childRefs', 'children-ref')
-      .leftJoinAndSelect('children-ref.parentUser', 'parentUser');
     if (id) {
       user.andWhere('user.id = :id', { id });
     }
@@ -60,7 +58,7 @@ export class UsersService {
     if (lastName) {
       user.andWhere('user.lastName = :lastName', { lastName });
     }
-   
+
 
     if (phoneNumber) {
       user.andWhere('user.phoneNumber = :phoneNumber', { phoneNumber });
@@ -113,7 +111,7 @@ export class UsersService {
     return this.usersRepository.find({ username });
   }
 
-  
+
   async update(id: number, attrs: UpdateUserDto) {
     const user = await this.findOne(id);
     if (!user) throw new NotFoundException('User not found!');
