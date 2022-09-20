@@ -20,6 +20,9 @@ export class CreateNovelDto {
   status?: string;
 
   @IsOptional()
+  active?: boolean;
+
+  @IsOptional()
   sourceLink: string;
 
   @IsOptional()

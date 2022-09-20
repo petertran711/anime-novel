@@ -290,7 +290,7 @@ export class NovelService {
   async crawlNovels() {
     const allNovel = await this.findAll({});
     for (let novel of allNovel[0]) {
-      if (novel.sourceLink && novel.sourceLink !== '') {
+      if (novel.sourceLink && novel.sourceLink !== '' && novel.active) {
         this.openPage(novel.sourceLink)
             .then(async (body) => {
               // fs.writeFileSync('data.html', body);

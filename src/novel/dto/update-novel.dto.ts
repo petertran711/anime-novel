@@ -5,12 +5,16 @@ export class UpdateNovelDto {
     @ApiProperty()
     @IsOptional()
     views?: number;
-  
+
     @ApiProperty()
     @IsOptional()
     author?: string;
-  
+
     @ApiProperty()
     @IsOptional()
     rank?: string;
+
+    @ApiProperty()
+    @IsOptional()
+    active?: boolean;
 }
