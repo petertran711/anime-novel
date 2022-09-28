@@ -36,7 +36,7 @@ export class NovelService {
         .leftJoinAndSelect('novel.categories', 'category')
         .leftJoinAndSelect('novel.tags', 'tag')
         .leftJoinAndSelect('novel.chapters', 'chapter')
-        .select(['novel', 'chapter.uniqueName', 'category.id', 'category.name', 'tag.id', 'tag.name', 'tag.uniqueName'])
+        .select(['novel', 'chapter.uniqueName', 'chapter.updatedAt', 'category.id', 'category.name', 'tag.id', 'tag.name', 'tag.uniqueName'])
         .orderBy('novel.updatedAt', 'DESC');
 
     if (body.name) {
@@ -67,7 +67,7 @@ export class NovelService {
     }
 
     if (body.orderByLastUpdate) {
-      novels.orderBy('chapters.updatedAt', 'DESC');
+      novels.orderBy('chapter.updatedAt', 'DESC');
     }
 
     if (body.limit !== undefined && body.limit !== null) {
