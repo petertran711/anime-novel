@@ -313,7 +313,7 @@ export class NovelService {
                       uniqueName: name[name.length - 1],
                       url: link,
                       novel: novel,
-                      className: '.chapter-content'
+                      className: '.chapter-c'
                     })
                   })
                 } else {
