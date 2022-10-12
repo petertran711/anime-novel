@@ -492,8 +492,9 @@ export class NovelService {
           datapase += html;
         }
       })
+      
       const fileName = `${new Date().getTime().toString()}.txt`;
-      const filePath = fileName;
+      const filePath = `${process.env.CHAPTER_FILES}${fileName}`;
       fs.writeFileSync(filePath, datapase);
       const uniqueName = value.uniqueName.split('-');
       const ep = uniqueName[uniqueName.indexOf('chapter') + 1];
