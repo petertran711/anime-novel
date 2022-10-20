@@ -16,15 +16,15 @@ async function bootstrap() {
       'https://novel-cool.vercel.app'
   ];
   const app = await NestFactory.create(AppModule);
-  app.enableCors({
-    origin: function (origin, callback) {
-      if (!origin || whitelist.indexOf(origin) !== -1) {
-        callback(null, true);
-      } else {
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
-  });
+  // app.enableCors({
+  //   origin: function (origin, callback) {
+  //     if (!origin || whitelist.indexOf(origin) !== -1) {
+  //       callback(null, true);
+  //     } else {
+  //       callback(new Error('Not allowed by CORS'));
+  //     }
+  //   },
+  // });
   app.use(cookieParser());
   const novel = app.get(NovelCronJobService);
   novel.crawlNovel();
