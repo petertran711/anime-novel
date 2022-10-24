@@ -13,7 +13,7 @@ async function bootstrap() {
     'http://localhost:3000',
     'http://159.223.53.82:3000',
     'https://light-novel-pub-murex.vercel.app',
-      'https://novel-cool.vercel.app'
+    'https://novel-cool.vercel.app',
   ];
   const app = await NestFactory.create(AppModule);
   app.enableCors({
@@ -38,6 +38,6 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('/explorer', app, document);
-  await app.listen(3002);
+  await app.listen(process.env.PORT);
 }
 bootstrap();
