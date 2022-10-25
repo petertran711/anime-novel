@@ -14,6 +14,7 @@ async function bootstrap() {
     'http://159.223.53.82:3000',
     'https://light-novel-pub-murex.vercel.app',
     'https://novel-cool.vercel.app',
+    'https://novelcoolbo.vercel.app'
   ];
   const app = await NestFactory.create(AppModule);
   app.enableCors({
