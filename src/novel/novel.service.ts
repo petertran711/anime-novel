@@ -217,7 +217,9 @@ export class NovelService {
           tags: tags,
         },
     );
-    novel.sourceLink = '';
+    if (!novel.uniqueName) {
+      novel.uniqueName = createUniqName(novel.name.trim());
+    }
     const newNovel = await getRepository(Novel).save(novel);
     const chapters = []
     await this.crawlWithNew(data.sourceLink, newNovel, chapters);
@@ -239,6 +241,13 @@ export class NovelService {
       }
     }
     return newNovel;
+  }
+
+  createUniqName(name: string) {
+    return name
+        .toLowerCase()
+        .replace(/[^\w ]+/g, '')
+        .replace(/ +/g, '-');
   }
 
   async createNovelBySource() {
