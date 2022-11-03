@@ -18,6 +18,7 @@ export class CommentService {
     }
     let data = new Comment();
     data.content = createCommentDto.content;
+    data.rate = createCommentDto.rate;
     data.parent = parent;
     data.user = user;
     data.novel = novel;
