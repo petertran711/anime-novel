@@ -9,21 +9,26 @@ export default class JwtAuthenticationGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const headers = context.switchToHttp().getRequest().headers;
-    const accessToken = (headers.token.toString().replace('Bearer ', '')) || null;
-    let decoded;
-    if (accessToken) {
-      try {
-        const payload: any = jwt.decode(accessToken);
-        const user = await getRepository(User).findOne({ id: payload.userId, isDelete: false });
-        const key = user.secrectKey
-        decoded = jwt.verify(accessToken, key);
-      } catch (err) {
-        console.log('eerr', err);
-        throw new UnauthorizedException();
+    if (headers.token) {
+      const accessToken = (headers.token.toString().replace('Bearer ', '')) || null;
+      let decoded;
+      if (accessToken) {
+        try {
+          const payload: any = jwt.decode(accessToken);
+          const user = await getRepository(User).findOne({ id: payload.userId, isDelete: false });
+          const key = user.secrectKey
+          decoded = jwt.verify(accessToken, key);
+        } catch (err) {
+          console.log('eerr', err);
+          throw new UnauthorizedException();
+        }
+      } else {
+        throw new UnauthorizedException('Token Invalid');
       }
     } else {
-      throw new UnauthorizedException('Token Invalid');
+      throw new UnauthorizedException('Authorized');
     }
+
     return true;
   }
 }
