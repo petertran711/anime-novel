@@ -9,8 +9,8 @@ export default class JwtAuthenticationGuard implements CanActivate {
   constructor(private reflector: Reflector) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const headers = context.switchToHttp().getRequest().headers;
-    if (headers.token) {
-      const accessToken = (headers.token.toString().replace('Bearer ', '')) || null;
+    if (headers.authorization) {
+      const accessToken = (headers.authorization.toString().replace('Bearer ', '')) || null;
       let decoded;
       if (accessToken) {
         try {
