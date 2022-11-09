@@ -435,58 +435,54 @@ export class NovelService {
       if (!this.browser) {
         this.init();
       } else {
-        this.browser.newPage().then(async (page) => {
-          const blocked_domains = [
-            'googlesyndication.com',
-            'adservice.google.com',
-            'google-analytics.com',
-            'trends.revcontent.com',
-            'assets.revcontent.com',
-            'js.ad-score.com',
-            'img.revcontent.com',
-            'cdn.revcontent.com',
-            'yeet.revcontent.com',
-            'data.ad-score.com',
-            'gum.criteo.com',
-            'api.rlcdn.com',
-            'id.crwdcntrl.net',
-            'mug.criteo.com',
-            'services.vlitag.com',
-            'assets.vlitag.com',
-            'googletagservices.com',
-            'imasdk.googleapis.com',
-            'securepubads.g.doubleclick.net',
-            'cdn.jsdelivr.net',
-            'px.vliplatform.com',
-            'media.vlitag.com'
-          ];
+        try {
+        const page = await this.browser.newPage();
+        const blocked_domains = [
+          'googlesyndication.com',
+          'adservice.google.com',
+          'google-analytics.com',
+          'trends.revcontent.com',
+          'assets.revcontent.com',
+          'js.ad-score.com',
+          'img.revcontent.com',
+          'cdn.revcontent.com',
+          'yeet.revcontent.com',
+          'data.ad-score.com',
+          'gum.criteo.com',
+          'api.rlcdn.com',
+          'id.crwdcntrl.net',
+          'mug.criteo.com',
+          'services.vlitag.com',
+          'assets.vlitag.com',
+          'googletagservices.com',
+          'imasdk.googleapis.com',
+          'securepubads.g.doubleclick.net',
+          'cdn.jsdelivr.net',
+          'px.vliplatform.com',
+          'media.vlitag.com'
+        ];
 
-          await page.setRequestInterception(true);
-          page.on('request', request => {
-            const url = request.url()
-            if (blocked_domains.some(domain => url.includes(domain))) {
-              request.abort();
-            } else {
-              request.continue();
-            }
-          });
-          try {
-            await page.goto(value, {waitUntil: 'networkidle0', timeout: 0});
-            if (className) {
-              await page.waitForSelector(`.${className}`, {timeout: 2000});
-            }
-            const body = await page.evaluate(() => {
-              return document.querySelector('body').innerHTML;
-            });
-            await page.close();
-            resolve(body);
-          } catch (e) {
-            reject(e);
+        await page.setRequestInterception(true);
+        page.on('request', request => {
+          const url = request.url()
+          if (blocked_domains.some(domain => url.includes(domain))) {
+            request.abort();
+          } else {
+            request.continue();
           }
-        })
-            .catch(e => {
-              console.log(e);
-            });
+        });
+          await page.goto(value, {waitUntil: 'networkidle0', timeout: 0});
+          if (className) {
+            await page.waitForSelector(`.${className}`, {timeout: 2000});
+          }
+          const body = await page.evaluate(() => {
+            return document.querySelector('body').innerHTML;
+          });
+          await page.close();
+          resolve(body);
+        } catch (e) {
+          reject(e);
+        }
       }
     });
   }
