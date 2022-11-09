@@ -1,14 +1,33 @@
-import { Injectable } from '@nestjs/common';
+import {BadRequestException, Injectable, NotFoundException} from '@nestjs/common';
 import { TagSearchLog } from 'src/tag-search-log/entities/tag-search-log.entity';
-import { getRepository, Like } from 'typeorm';
+import {getRepository, Like, Repository} from 'typeorm';
 import { CreateTagDto } from './dto/create-tag.dto';
 import { FindTagDto } from './dto/find-tag.dto';
 import { Tag } from './entities/tag.entity';
+import {InjectRepository} from "@nestjs/typeorm";
+import {UpdateUserDto} from "../users/dtos/update-user.dto";
 
 @Injectable()
 export class TagService {
+
+  constructor(@InjectRepository(Tag) private tagRepository: Repository<Tag>) {
+  }
   create(createTagDto: CreateTagDto) {
-    return 'This action adds a new tag';
+    try {
+      const category = this.tagRepository.create(createTagDto);
+      return this.tagRepository.save(category);
+    } catch (e) {
+      if (e.code === 'ER_DUP_ENTRY') {
+        throw new BadRequestException('Trùng tên');
+      }
+    }
+  }
+
+  async update(id: number, attrs: CreateTagDto) {
+    const tag = await this.findOne(id);
+    if (!tag) throw new NotFoundException('Tag not found!');
+    Object.assign(tag, attrs);
+    return this.tagRepository.save(tag);
   }
 
   async findAll(body: FindTagDto) {
@@ -45,8 +64,12 @@ export class TagService {
     return data;
   }
 
-  findOne(id: number) {
-    return getRepository(Tag).findOne();
+  async findOne(id: number) {
+    if (!id) return null;
+    let averageRate = 0;
+    let totalCourseSell = 0;
+    const tag = await this.tagRepository.createQueryBuilder('tag').andWhere('tag.id = :id', {id}).getOne();
+    return tag;
   }
 
   async findByCharacter(body: FindTagDto) {

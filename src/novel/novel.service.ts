@@ -169,78 +169,82 @@ export class NovelService {
   }
 
   async create(data: CreateNovelDto) {
-    let categories;
-    let tags;
-    if (data.categories) {
-      categories = await getRepository(Category).find({where: {name: In(data.categories)}});
-      if (categories.length == 0) {
-        const createCategories = [];
-        data.categories.forEach((it) => {
-          createCategories.push({
-            name: it,
-            uniqueName: createUniqName(it),
+    try {
+      let categories;
+      let tags;
+      if (data.categories) {
+        categories = await getRepository(Category).find({where: {id: In(data.categories)}});
+        if (categories.length == 0) {
+          const createCategories = [];
+          data.categories.forEach((it) => {
+            createCategories.push({
+              name: it,
+              uniqueName: createUniqName(it),
+            });
           });
-        });
-        categories = await getRepository(Category).save(createCategories);
+          categories = await getRepository(Category).save(createCategories);
+        }
       }
-    }
-    if (data.tags) {
-      tags = await getRepository(Tag).find({
-        where: {
-          name: In(data.tags),
-        },
-      });
-      if (tags.length == 0) {
-        const createTags = [];
-        data.tags.forEach((it) => {
-          createTags.push({
-            name: it,
-            uniqueName: createUniqName(it),
+      if (data.tags) {
+        tags = await getRepository(Tag).find({
+          where: {
+            id: In(data.tags),
+          },
+        });
+        if (tags.length == 0) {
+          const createTags = [];
+          data.tags.forEach((it) => {
+            createTags.push({
+              name: it,
+              uniqueName: createUniqName(it),
+            });
           });
-        });
-        tags = await getRepository(Tag).save(createTags);
+          tags = await getRepository(Tag).save(createTags);
+        }
       }
-    }
-    const novel = Object.assign(
-        {},
-        data,
-        {
-          status: Status.Ongoing,
-          views: 0,
-          bookmarked: 0,
-          rank: 0,
-        },
-        {
-          categories: categories,
-        },
-        {
-          tags: tags,
-        },
-    );
-    if (!novel.uniqueName) {
-      novel.uniqueName = createUniqName(novel.name.trim());
-    }
-    const newNovel = await getRepository(Novel).save(novel);
-    const chapters = []
-    await this.crawlWithNew(data.sourceLink, newNovel, chapters);
-    for (const chapter of chapters) {
-      const crawling = GlobalService.globalVar.find(value => value.link === chapter.url);
-      if (!crawling) {
-        GlobalService.globalVar.push({link: chapter.url})
-        const idx = chapters.indexOf(chapter);
-        this.getChapter({
-          url: chapter.url,
-          name: chapter.name,
-          uniqueName: chapter.uniqueName
-        }, chapter.novel, chapter.className, idx === chapters.length - 1, data.sourceLink);
-        // if (idx === chapters.length - 1) {
-        //     newNovel.sourceLink = data.sourceLink;
-        //     const updateNovel = await getRepository(Novel).update(newNovel.id, {sourceLink: data.sourceLink});
-        //     console.log(updateNovel);
-        // }
+      const novel = Object.assign(
+          {},
+          data,
+          {
+            status: Status.Ongoing,
+            views: 0,
+            bookmarked: 0,
+            rank: 0,
+          },
+          {
+            categories: categories,
+          },
+          {
+            tags: tags,
+          },
+      );
+      if (!novel.uniqueName) {
+        novel.uniqueName = createUniqName(novel.name.trim());
       }
+      const newNovel = await getRepository(Novel).save(novel);
+      const chapters = []
+      await this.crawlWithNew(data.sourceLink, newNovel, chapters);
+      for (const chapter of chapters) {
+        const crawling = GlobalService.globalVar.find(value => value.link === chapter.url);
+        if (!crawling) {
+          GlobalService.globalVar.push({link: chapter.url})
+          const idx = chapters.indexOf(chapter);
+          this.getChapter({
+            url: chapter.url,
+            name: chapter.name,
+            uniqueName: chapter.uniqueName
+          }, chapter.novel, chapter.className, idx === chapters.length - 1, data.sourceLink);
+          // if (idx === chapters.length - 1) {
+          //     newNovel.sourceLink = data.sourceLink;
+          //     const updateNovel = await getRepository(Novel).update(newNovel.id, {sourceLink: data.sourceLink});
+          //     console.log(updateNovel);
+          // }
+        }
+      }
+      return newNovel;
+    } catch (e) {
+      console.log(e);
     }
-    return newNovel;
   }
 
   createUniqName(name: string) {
@@ -516,6 +520,7 @@ export class NovelService {
         episode: ep || 0
       };
       const chapte1r = await getRepository(Chapter).save(chapterDto);
+      console.log(chapte1r, 'chapter created')
       const userBookmark: any[] = await this.getUserBookmark(novel.id);
       const req = [];
       userBookmark[0].forEach(user => {
