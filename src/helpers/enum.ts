@@ -21,3 +21,7 @@ export enum Status {
 export enum NotificationType {
   NewChapter = 'NewChapter'
 }
+
+export enum EventEmit {
+  NovelCreated = 'NovelCreated'
+}
