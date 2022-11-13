@@ -234,6 +234,8 @@ export class NovelService {
         console.log('Message Received: ', newNovel);
         const chapters = []
         await this.crawlWithNew(newNovel.sourceLink, newNovel, chapters);
+        newNovel.getChapters = chapters.length.toString();
+        await getRepository(Novel).save(newNovel);
         for (const chapter of chapters) {
             const crawling = GlobalService.globalVar.find(value => value.link === chapter.url);
             if (!crawling) {
@@ -520,7 +522,7 @@ export class NovelService {
                 }
             })
             const fileName = `${new Date().getTime().toString()}.txt`;
-            const filePath = `${fileName}`;
+            const filePath = `${process.env.CHAPTER_FILES}${fileName}`;
             console.log(filePath, 'filePath');
             fs.writeFileSync(filePath, datapase);
             const uniqueName = value.uniqueName.split('-');

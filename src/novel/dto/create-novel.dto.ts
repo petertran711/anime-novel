@@ -26,6 +26,9 @@ export class CreateNovelDto {
   sourceLink: string;
 
   @IsOptional()
+  getChapters?: string;
+
+  @IsOptional()
   categories: string[];
 
   @IsOptional()
