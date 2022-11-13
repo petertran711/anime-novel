@@ -46,6 +46,9 @@ export class Novel {
   status: string;
 
   @Column({ nullable: true })
+  getChapters: string;
+
+  @Column({ nullable: true })
   sourceLink: string;
 
   @Column({ nullable: true })
