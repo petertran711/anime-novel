@@ -19,7 +19,7 @@ import {EventEmitter2, OnEvent} from "@nestjs/event-emitter";
 const cheerio = require('cheerio'); // khai báo module cheerio
 const fs = require('fs');
 
-import fs2 from 'fs/promises'
+import { writeFile } from 'fs/promises'
 const request = require('request-promise'); // khai báo module request-promise
 const puppeteer = require('puppeteer');
 
@@ -528,7 +528,7 @@ export class NovelService {
             const fileName = `${new Date().getTime().toString()}.txt`;
             const filePath = `${process.env.CHAPTER_FILES}${fileName}`;
             console.log(filePath, 'filePath');
-            fs2.writeFile(filePath, datapase)
+            writeFile(filePath, datapase)
                 .catch( e => {
                     console.log(e, 'error write file');
                 });
