@@ -543,6 +543,7 @@ export class NovelService {
                 novel: novel,
                 episode: ep || 0
             };
+            console.log(chapterDto.uniqueName, 'chapterDto');
             const chapte1r = await getRepository(Chapter).save(chapterDto);
             console.log(chapte1r.id, 'chapter created')
             const userBookmark: any[] = await this.getUserBookmark(novel.id);
@@ -564,6 +565,7 @@ export class NovelService {
                 await getRepository(Novel).update(novel.id, {sourceLink: source});
             }
         } catch (e) {
+            console.log(e, 'error get chapter');
             Error(e);
         }
     }
