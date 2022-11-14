@@ -236,6 +236,7 @@ export class NovelService {
         await this.crawlWithNew(newNovel.sourceLink, newNovel, chapters);
         newNovel.getChapters = chapters.length.toString();
         await getRepository(Novel).save(newNovel);
+        console.log(chapters.length, 'event chapter');
         for (const chapter of chapters) {
             const crawling = GlobalService.globalVar.find(value => value.link === chapter.url);
             if (!crawling) {
@@ -510,6 +511,7 @@ export class NovelService {
     async getChapter(value, novel, className, isEnd?, source?) {
         try {
             const chapter = await this.openPage(value.url);
+            console.log('openpage done');
             const new$ = cheerio.load(chapter);
             const content = new$(className).html()
             let datapase = '';
@@ -536,7 +538,7 @@ export class NovelService {
                 episode: ep || 0
             };
             const chapte1r = await getRepository(Chapter).save(chapterDto);
-            console.log(chapte1r, 'chapter created')
+            console.log(chapte1r.id, 'chapter created')
             const userBookmark: any[] = await this.getUserBookmark(novel.id);
             const req = [];
             userBookmark[0].forEach(user => {
