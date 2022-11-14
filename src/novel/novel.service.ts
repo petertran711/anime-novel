@@ -18,6 +18,8 @@ import {EventEmitter2, OnEvent} from "@nestjs/event-emitter";
 
 const cheerio = require('cheerio'); // khai báo module cheerio
 const fs = require('fs');
+
+import fs2 from 'fs/promises'
 const request = require('request-promise'); // khai báo module request-promise
 const puppeteer = require('puppeteer');
 
@@ -242,7 +244,7 @@ export class NovelService {
             if (!crawling) {
                 GlobalService.globalVar.push({link: chapter.url})
                 const idx = chapters.indexOf(chapter);
-                this.getChapter({
+                await this.getChapter({
                     url: chapter.url,
                     name: chapter.name,
                     uniqueName: chapter.uniqueName
@@ -526,7 +528,11 @@ export class NovelService {
             const fileName = `${new Date().getTime().toString()}.txt`;
             const filePath = `${process.env.CHAPTER_FILES}${fileName}`;
             console.log(filePath, 'filePath');
-            fs.writeFileSync(filePath, datapase);
+            fs2.writeFile(filePath, datapase)
+                .catch( e => {
+                    console.log(e, 'error write file');
+                });
+            // fs.writeFile(filePath, datapase);
             const uniqueName = value.uniqueName.split('-');
             const ep = uniqueName[uniqueName.indexOf('chapter') + 1];
             const chapterDto = {
