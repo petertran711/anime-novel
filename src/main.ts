@@ -16,7 +16,9 @@ async function bootstrap() {
     'https://novel-cool.vercel.app',
     'https://novelcoolbo.vercel.app',
       'https://www.readfullnovels.net',
-      'https://readfullnovels.net'
+      'https://readfullnovels.net',
+      'https://latestnovels.net',
+      'https://allfreenovels.net'
   ];
   const app = await NestFactory.create(AppModule);
   app.enableCors({
