@@ -239,10 +239,12 @@ export class NovelService {
         newNovel.getChapters = chapters.length.toString();
         await getRepository(Novel).save(newNovel);
         console.log(chapters.length, 'event chapter');
+        const chapterCrawing = [];
         for (const chapter of chapters) {
-            const crawling = GlobalService.globalVar.find(value => value.link === chapter.url);
+            const crawling = chapterCrawing.find(value => value.link === chapter.url);
             if (!crawling) {
                 GlobalService.globalVar.push({link: chapter.url})
+                chapterCrawing.push({link: chapter.url})
                 const idx = chapters.indexOf(chapter);
                 await this.getChapter({
                     url: chapter.url,
