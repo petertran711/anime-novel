@@ -3,6 +3,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { NovelCronJobService } from './schedule/novel-cron-job';
+import * as bodyParser from 'body-parser'
 
 async function bootstrap() {
   const whitelist = [
@@ -21,6 +22,8 @@ async function bootstrap() {
       'https://allfreenovels.net'
   ];
   const app = await NestFactory.create(AppModule);
+  app.use(bodyParser.json({limit: '50mb'}));
+  app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
   app.enableCors({
     origin: function (origin, callback) {
       console.log('origin', origin);
