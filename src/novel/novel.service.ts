@@ -237,20 +237,21 @@ export class NovelService {
         const chapters = []
         await this.crawlWithNew(newNovel.sourceLink, newNovel, chapters);
         newNovel.getChapters = chapters.length.toString();
-        await getRepository(Novel).save(newNovel);
+        await getRepository(Novel).update(newNovel.id,{getChapters: chapters.length.toString()});
         console.log(chapters.length, 'event chapter');
         const chapterCrawing = [];
         for (const chapter of chapters) {
-            const crawling = chapterCrawing.find(value => value.link === chapter.url);
+            const crawling = chapterCrawing.find(value => value.link === chapter.url && value.uniqueName === chapter.uniqueName);
+            console.log(crawling, 'crawling');
+            console.log(chapterCrawing, 'chapterCrawing');
             if (!crawling) {
-                GlobalService.globalVar.push({link: chapter.url})
+                GlobalService.globalVar.push({link: chapter.url , uniqueName: chapter.uniqueName})
                 chapterCrawing.push({link: chapter.url})
-                const idx = chapters.indexOf(chapter);
                 await this.getChapter({
                     url: chapter.url,
                     name: chapter.name,
                     uniqueName: chapter.uniqueName
-                }, chapter.novel, chapter.className, idx === chapters.length - 1, newNovel.sourceLink);
+                }, chapter.novel, chapter.className, newNovel.sourceLink);
                 // if (idx === chapters.length - 1) {
                 //     newNovel.sourceLink = data.sourceLink;
                 //     const updateNovel = await getRepository(Novel).update(newNovel.id, {sourceLink: data.sourceLink});
@@ -512,7 +513,7 @@ export class NovelService {
         });
     }
 
-    async getChapter(value, novel, className, isEnd?, source?) {
+    async getChapter(value, novel, className, source?) {
         try {
             const chapter = await this.openPage(value.url);
             console.log('openpage done');
@@ -563,9 +564,9 @@ export class NovelService {
             await Promise.all(req);
             const deleteFromGlobal = GlobalService.globalVar.find(url => url.link === value.url);
             GlobalService.globalVar.splice(GlobalService.globalVar.indexOf(deleteFromGlobal), 1);
-            if (isEnd) {
-                await getRepository(Novel).update(novel.id, {sourceLink: source});
-            }
+            // if (isEnd) {
+            //     await getRepository(Novel).update(novel.id, {sourceLink: source});
+            // }
         } catch (e) {
             console.log(e, 'error get chapter');
             Error(e);
