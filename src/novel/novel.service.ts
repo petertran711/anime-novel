@@ -224,15 +224,15 @@ export class NovelService {
                 novel.uniqueName = createUniqName(novel.name.trim());
             }
             const newNovel = await getRepository(Novel).save(novel);
-            this.eventEmitter.emit(EventEmit.NovelCreated, newNovel);
+            this.eventEmitter.emit('novel.create', newNovel);
             return newNovel;
         } catch (e) {
             console.log(e);
         }
     }
 
-    @OnEvent(EventEmit.NovelCreated)
-    async listentToEvent(newNovel: Novel) {
+    // @OnEvent('novel.create')
+    async listenToEvent(newNovel: Novel) {
         console.log('Message Received: ', newNovel);
         const chapters = []
         await this.crawlWithNew(newNovel.sourceLink, newNovel, chapters);
