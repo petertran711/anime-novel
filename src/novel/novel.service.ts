@@ -166,7 +166,7 @@ export class NovelService {
         if (!existNovel) {
             throw new NotFoundException();
         }
-        const update = Object.assign({}, existNovel, updateNovelDto);
+        const update = Object.assign({}, updateNovelDto);
         return getRepository(Novel).save(update);
     }
 
