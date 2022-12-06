@@ -33,6 +33,7 @@ export class CategoryService {
   findAll(body : FindCategoryDto) {
     const novels = getRepository(Category)
       .createQueryBuilder('category')
+        .orderBy('category.updatedAt', 'DESC')
       .leftJoinAndSelect('category.novels', 'novels')
 
     if (body.name) {
