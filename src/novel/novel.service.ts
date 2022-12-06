@@ -161,13 +161,13 @@ export class NovelService {
         return novels.getManyAndCount();
     }
 
-    async update(id: number, updateNovelDto: UpdateNovelDto) {
+    async update(id: number, updateNovelDto: Partial<UpdateNovelDto>) {
         const existNovel = await getRepository(Novel).findOne(id);
         if (!existNovel) {
             throw new NotFoundException();
         }
-        const update = Object.assign({}, updateNovelDto);
-        return getRepository(Novel).save(update);
+        Object.assign(existNovel, updateNovelDto);
+        return getRepository(Novel).save(existNovel);
     }
 
     async create(data: CreateNovelDto) {
