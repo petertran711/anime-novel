@@ -23,6 +23,7 @@ import { TagModule } from './tag/tag.module';
 import { UsersModule } from './users/users.module';
 import {ChapterService} from "./chapter/chapter.service";
 import {EventEmitterModule} from "@nestjs/event-emitter";
+import { ReviewModule } from './review/review.module';
 
 const cookieSession = require('cookie-session');
 
@@ -44,6 +45,7 @@ const cookieSession = require('cookie-session');
       // disable throwing uncaughtException if an error event is emitted and it has no listeners
       ignoreErrors: false,
     }),
+
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: `${process.env.NODE_ENV}.env`,
@@ -102,6 +104,7 @@ const cookieSession = require('cookie-session');
     InAppNotificationModule,
     TagSearchLogModule,
     ScheduleModule.forRoot(),
+    ReviewModule,
   ],
   controllers: [AppController],
   providers: [

@@ -24,7 +24,7 @@ export class Novel {
   @Column({ nullable: true, unique: true })
   uniqueName: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'longtext' })
   description: string;
 
   @Column({ nullable: true })
