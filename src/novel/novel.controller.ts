@@ -5,6 +5,7 @@ import { FindNovelAdvDto } from './dto/find-novel-adv.dto';
 import { FindNovelDto } from './dto/find-novel.dto';
 import { UpdateNovelDto } from './dto/update-novel.dto';
 import { NovelService } from './novel.service';
+import {TranslateDto} from "./dto/TranslateDto";
 
 @ApiTags('Novel')
 @Controller('novel')
@@ -61,5 +62,10 @@ export class NovelController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateNovelDto: UpdateNovelDto) {
     return this.novelService.update(+id, updateNovelDto);
+  }
+
+  @Post('/translate')
+  translate(@Body() body: TranslateDto) {
+    return this.novelService.translate(body);
   }
 }

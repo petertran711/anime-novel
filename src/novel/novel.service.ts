@@ -4,7 +4,7 @@ import {createUniqName, donwloadFileFromURL} from 'src/helpers/ultils';
 import {Tag} from 'src/tag/entities/tag.entity';
 import {getRepository, In} from 'typeorm';
 import {Chapter} from '../chapter/entities/chapter.entity';
-import {EventEmit, NotificationType, Status} from '../helpers/enum';
+import {Config, EventEmit, NotificationType, Status} from '../helpers/enum';
 import {CreateNovelDto} from './dto/create-novel.dto';
 import {FindNovelAdvDto} from './dto/find-novel-adv.dto';
 import {FindNovelDto} from './dto/find-novel.dto';
@@ -18,10 +18,16 @@ import {EventEmitter2, OnEvent} from "@nestjs/event-emitter";
 
 const cheerio = require('cheerio'); // khai báo module cheerio
 const fs = require('fs');
+const {Translate} = require('@google-cloud/translate').v2;
 
 import { writeFile } from 'fs/promises'
+import {TranslateDto} from "./dto/TranslateDto";
 const request = require('request-promise'); // khai báo module request-promise
 const puppeteer = require('puppeteer');
+
+const projectId = Config.PROJECT_ID;
+const apiKey = Config.API_KEY;
+const translate = new Translate({projectId: projectId, key: apiKey});
 
 @Injectable()
 export class NovelService {
@@ -639,5 +645,22 @@ export class NovelService {
             return courses;
         }
         return [[], 0];
+    }
+
+    async translate(body: TranslateDto) {
+        try{
+            const text = body.data
+
+            // The target language
+            const target = body.target;
+
+            // Translates some text into Russian
+            const [translation] = await translate.translate(text, target);
+            console.log(`Text: ${text}`);
+            console.log(`Translation: ${translation}`);
+            return {data: translation};
+        } catch (e) {
+            console.log(e);
+        }
     }
 }
