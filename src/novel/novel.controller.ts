@@ -68,4 +68,9 @@ export class NovelController {
   translate(@Body() body: TranslateDto) {
     return this.novelService.translate(body);
   }
+
+  @Get('/:id/reCrawl')
+  reCrawl(@Param('id') id: string) {
+    return this.novelService.reCrawlNew(+id);
+  }
 }

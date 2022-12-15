@@ -17,4 +17,12 @@ export class NovelCreatedListener {
         this.novelService.listenToEvent(novel).then(value => console.log(value))
             .catch(e => console.log(e));
     }
+
+    @OnEvent('novel.reCrawl')
+    handleOrderReCrawlEvent(novel: Novel) {
+        // handle and process "OrderCreatedEvent" event
+        console.log(novel.name, 'message');
+        this.novelService.listenToReCrawl(novel).then(value => console.log(value))
+            .catch(e => console.log(e));
+    }
 }

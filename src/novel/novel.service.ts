@@ -239,17 +239,13 @@ export class NovelService {
 
     // @OnEvent('novel.create')
     async listenToEvent(newNovel: Novel) {
-        console.log('Message Received: ', newNovel);
         const chapters = []
         await this.crawlWithNew(newNovel.sourceLink, newNovel, chapters);
         newNovel.getChapters = chapters.length.toString();
         await getRepository(Novel).update(newNovel.id,{getChapters: chapters.length.toString()});
-        console.log(chapters.length, 'event chapter');
         const chapterCrawing = [];
         for (const chapter of chapters) {
             const crawling = chapterCrawing.find(value => value.link === chapter.url && value.uniqueName === chapter.uniqueName);
-            console.log(crawling, 'crawling');
-            console.log(chapterCrawing, 'chapterCrawing');
             if (!crawling) {
                 GlobalService.globalVar.push({link: chapter.url , uniqueName: chapter.uniqueName})
                 chapterCrawing.push({link: chapter.url})
@@ -302,7 +298,6 @@ export class NovelService {
                             tags.push(text);
                         });
 
-                        console.log(123);
                         const myNovel: CreateNovelDto = {
                             name: title.trim(),
                             uniqueName: createUniqName(title.trim()),
@@ -522,7 +517,6 @@ export class NovelService {
     async getChapter(value, novel, className, source?) {
         try {
             const chapter = await this.openPage(value.url);
-            console.log('openpage done');
             const new$ = cheerio.load(chapter);
             const content = new$(className).html()
             let datapase = '';
@@ -536,14 +530,12 @@ export class NovelService {
             })
             const fileName = `${new Date().getTime().toString()}.txt`;
             const filePath = `${process.env.CHAPTER_FILES}${fileName}`;
-            console.log(filePath, 'filePath');
             writeFile(filePath, datapase)
                 .catch( e => {
                     console.log(e, 'error write file');
                 });
-            // fs.writeFile(filePath, datapase);
             const uniqueName = value.uniqueName.split('-');
-            const ep = uniqueName[uniqueName.indexOf('chapter') + 1];
+            const ep = uniqueName[uniqueName.indexOf('chapter') + 1].replace(/\D/g,'');
             const chapterDto = {
                 name: value.name,
                 uniqueName: value.uniqueName,
@@ -552,9 +544,7 @@ export class NovelService {
                 novel: novel,
                 episode: ep || 0
             };
-            console.log(chapterDto.uniqueName, 'chapterDto');
             const chapte1r = await getRepository(Chapter).save(chapterDto);
-            console.log(chapte1r.id, 'chapter created')
             const userBookmark: any[] = await this.getUserBookmark(novel.id);
             const req = [];
             userBookmark[0].forEach(user => {
@@ -656,11 +646,36 @@ export class NovelService {
 
             // Translates some text into Russian
             const [translation] = await translate.translate(text, target);
-            console.log(`Text: ${text}`);
-            console.log(`Translation: ${translation}`);
             return {data: translation};
         } catch (e) {
             console.log(e);
+        }
+    }
+
+    async reCrawlNew(id) {
+        const existNovel = await getRepository(Novel).findOne(id);
+        if (!existNovel) {
+            throw new NotFoundException();
+        }
+        this.eventEmitter.emit('novel.reCrawl', existNovel);
+    }
+
+    async listenToReCrawl(existNovel) {
+        const chapters = [];
+        const novelChapter = await getRepository(Chapter).createQueryBuilder('chapter').leftJoinAndSelect('chapter.novel', 'novel')
+            .select(['chapter.uniqueName', 'chapter.id'])
+            .where('novel.id=:id', { id: existNovel.id }).getMany();
+        await this.crawlWithNew(existNovel.sourceLink, existNovel, chapters);
+        for (const chapter of chapters) {
+            const existChapter = novelChapter.find(el => el.uniqueName === chapter.uniqueName);
+            if (!existChapter) {
+                GlobalService.globalVar.push({link: chapter.url , uniqueName: chapter.uniqueName})
+                await this.getChapter({
+                    url: chapter.url,
+                    name: chapter.name,
+                    uniqueName: chapter.uniqueName
+                }, chapter.novel, chapter.className, existNovel.sourceLink);
+            }
         }
     }
 }
