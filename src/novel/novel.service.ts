@@ -41,12 +41,17 @@ export class NovelService {
     async findAll(body: FindNovelDto) {
         const novels = getRepository(Novel)
             .createQueryBuilder('novel')
-            .leftJoinAndSelect('novel.categories', 'category')
-            .leftJoinAndSelect('novel.tags', 'tag')
-            .leftJoinAndSelect('novel.chapters', 'chapter')
-            .select(['novel', 'chapter.uniqueName', 'chapter.updatedAt', 'category.id', 'category.name', 'tag.id', 'tag.name', 'tag.uniqueName'])
-            .orderBy('novel.updatedAt', 'DESC');
-
+            .leftJoin('novel.categories', 'categorys')
+            .leftJoin('novel.tags', 'tags')
+            .leftJoin('novel.chapters', 'chapters')
+            .select(['novel', 'chapters.id', 'chapters.uniqueName', 'chapters.episode', 'chapters.updatedAt', 'categorys.id', 'categorys.name', 'tags.id', 'tags.name', 'tags.uniqueName'])
+        if(body.orderByLastCreate) {
+            novels.orderBy('novel.createdAt', 'DESC');
+        } else if (body.orderByView) {
+            novels.orderBy('novel.views', 'DESC');
+        } else {
+            novels.orderBy('novel.updatedAt', 'DESC');
+        }
         if (body.name) {
             novels.andWhere('novel.name LIKE :name', {name: `%${body.name}%`});
         }
@@ -85,7 +90,7 @@ export class NovelService {
         if (body.skip !== undefined && body.skip !== null && body.skip) {
             novels.skip(body.skip);
         }
-
+        console.log(novels.getSql(), 'novel sql');
         const data = await novels.getManyAndCount();
         return data;
     }
