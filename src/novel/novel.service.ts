@@ -80,7 +80,7 @@ export class NovelService {
         }
 
         if (body.orderByLastUpdate) {
-            novels.orderBy('chapter.updatedAt', 'DESC');
+            novels.orderBy('chapters.updatedAt', 'DESC');
         }
 
         if (body.limit !== undefined && body.limit !== null) {
@@ -90,7 +90,6 @@ export class NovelService {
         if (body.skip !== undefined && body.skip !== null && body.skip) {
             novels.skip(body.skip);
         }
-        console.log(novels.getSql(), 'novel sql');
         const data = await novels.getManyAndCount();
         return data;
     }
