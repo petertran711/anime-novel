@@ -28,6 +28,11 @@ export class NovelController {
     return this.novelService.getByRanking();
   }
 
+  @Get('/getRandomNovel')
+  getRandomNovel() {
+    return this.novelService.getRandomNovel();
+  }
+
   @Get('/createNovel')
   createNovel() {
     return this.novelService.createNovelBySource();

@@ -683,4 +683,13 @@ export class NovelService {
             }
         }
     }
+
+    async getRandomNovel () {
+        const novel = getRepository(Novel)
+            .createQueryBuilder('novel')
+            .select(['novel.id', 'novel.uniqueName']);
+        const data = await novel.getMany();
+        const item = data[Math.floor(Math.random()*data.length)];
+        return item;
+    }
 }
