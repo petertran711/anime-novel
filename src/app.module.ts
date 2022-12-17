@@ -24,6 +24,7 @@ import { UsersModule } from './users/users.module';
 import {ChapterService} from "./chapter/chapter.service";
 import {EventEmitterModule} from "@nestjs/event-emitter";
 import { ReviewModule } from './review/review.module';
+import { GoogleModule } from './google/google.module';
 
 const cookieSession = require('cookie-session');
 
@@ -105,6 +106,7 @@ const cookieSession = require('cookie-session');
     TagSearchLogModule,
     ScheduleModule.forRoot(),
     ReviewModule,
+    GoogleModule,
   ],
   controllers: [AppController],
   providers: [

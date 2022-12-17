@@ -26,7 +26,7 @@ export class ReviewService {
         .orderBy('review.updatedAt', 'DESC')
 
     if (body.name) {
-      review.andWhere('category.name =:name', { name: body.name });
+      review.andWhere('review.name =:name', { name: body.name });
     }
     if (body.limit !== undefined && body.limit !== null) {
       review.take(body.limit);
