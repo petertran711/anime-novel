@@ -180,6 +180,12 @@ export class NovelService {
         return getRepository(Novel).save(existNovel);
     }
 
+     getRandomViews(min, max) {
+        min = Math.ceil(min);
+        max = Math.floor(max);
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
     async create(data: CreateNovelDto) {
         try {
             let categories;
@@ -214,12 +220,13 @@ export class NovelService {
                     tags = await getRepository(Tag).save(createTags);
                 }
             }
+            const views = this.getRandomViews(50000, 100000);
             const novel = Object.assign(
                 {},
                 data,
                 {
                     status: Status.Ongoing,
-                    views: 0,
+                    views: views,
                     bookmarked: 0,
                     rank: 0,
                 },

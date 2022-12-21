@@ -38,5 +38,8 @@ export class UpdateNovelDto {
     @IsOptional()
     sourceLink: string;
 
+    @IsOptional()
+    views?: number;
+
 
 }

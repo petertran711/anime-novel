@@ -33,4 +33,7 @@ export class CreateNovelDto {
 
   @IsOptional()
   tags: string[];
+
+  @IsOptional()
+  views?: number;
 }
