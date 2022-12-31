@@ -336,7 +336,7 @@ export class NovelService {
                         try {
                             const $ = cheerio.load(body);
                             const chapters = [];
-                            if (novel.sourceLink.startsWith('https://novelfull.com/')) {
+                            if (novel.sourceLink.startsWith('https://novelfull')) {
                                 $('.l-chapters > li').each(async (index, el) => {
                                     let link = `https://novelfull.com${$(el).find('a').attr('href')}`;
                                     let nameChapter = $(el).find('a').text();
