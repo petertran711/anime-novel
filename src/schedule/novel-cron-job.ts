@@ -7,11 +7,11 @@ export class NovelCronJobService {
   constructor(
     @Inject(Logger) private readonly logger: LoggerService,
   private novelServices: NovelService) {}
-  @Cron('* * * * *')
+  @Cron('*/30 * * * *')
   async crawlNovel() {
-    this.logger.log('Run cron job after 1 min');
+    this.logger.log('Run cron job after 30 min');
     return this.novelServices.crawlNovels().catch((e) => {
-      this.logger.error('Cannot craw novle', e);
+      this.logger.error('Cannot craw novel', e);
     });
   }
 }
