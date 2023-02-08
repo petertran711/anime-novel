@@ -541,7 +541,7 @@ export class NovelService {
                     console.log(e, 'error write file');
                 });
             const uniqueName = value.uniqueName.split('-');
-            const ep = uniqueName[uniqueName.indexOf('chapter') + 1].replace(/\D/g, '');
+            const ep = uniqueName[uniqueName.indexOf('chapter') + 1]? uniqueName[uniqueName.indexOf('chapter') + 1].replace(/\D/g, '') : '0';
             const chapterDto = {
                 name: value.name,
                 uniqueName: value.uniqueName,
@@ -650,9 +650,13 @@ export class NovelService {
             // The target language
             const target = body.target;
 
-            // Translates some text into Russian
-            const [translation] = await translate.translate(text, target);
-            return {data: translation};
+            if (text) {
+                // Translates some text into Russian
+                console.log(text)
+                // const [translation] = await translate.translate(text, target);
+                return {data: text};
+            }
+            return '';
         } catch (e) {
             console.log(e);
         }
